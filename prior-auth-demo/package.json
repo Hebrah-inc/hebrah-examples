@@ -1,0 +1,39 @@
+{
+  "name": "prior-auth-demo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3003",
+    "build": "next build",
+    "start": "next start --port 3003",
+    "lint": "eslint",
+    "mcp:admit": "tsx scripts/trigger-adt.mts admit",
+    "mcp:discharge": "tsx scripts/trigger-adt.mts discharge"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.5.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.17.0",
+    "next": "16.2.6",
+    "next-themes": "^0.4.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "shadcn": "^4.8.3",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.6.0",
+    "tw-animate-css": "^1.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.4",
+    "typescript": "^5"
+  }
+}

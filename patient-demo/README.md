@@ -7,7 +7,7 @@ Runs on port **3001** by default (see [hebrah-examples/README.md](../README.md) 
 ## Prerequisites
 
 1. Start hebrah-api and hebrah-app ([documentation/local-development.md](../../documentation/local-development.md))
-2. Complete hebrah onboarding and copy sandbox credentials from Step 2 (`hb_test_*`, `hbsec_*`)
+2. Complete hebrah onboarding and copy sandbox credentials from Step 2 (`hb_test_*`, `hbsec_*`, connection ID `conn-sa-...`)
 
 See [documentation/agent-quickstart.md](../../documentation/agent-quickstart.md) for a full local setup guide.
 
@@ -16,7 +16,7 @@ See [documentation/agent-quickstart.md](../../documentation/agent-quickstart.md)
 ```bash
 cd hebrah-examples/patient-demo
 cp .env.example .env
-# Edit .env with your hb_test_* and hbsec_* values
+# Edit .env with your hb_test_*, hbsec_*, and optional HEBRAH_CONNECTION_ID
 pnpm install
 pnpm dev
 ```
@@ -56,7 +56,7 @@ Use the same value for `NEXT_PUBLIC_APP_URL` (without the `/api/webhooks/hebrah`
 
 ## Verify
 
-1. Setup page shows catalog with org name and sample patient IDs
+1. Setup page shows catalog with org name and **connection-scoped** sample patient IDs (`pat_{connection_seed}_01`)
 2. Patients page lists sandbox patients
 3. Events → **Send test webhook** → inbound row appears after delivery
 4. Patient detail → **Admit patient** → webhook appears in Events inbox
