@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { fetchSyntheticProfile } from '@/lib/hebrah-api'
+import { fetchVmFhir } from '@/lib/vm-fhir'
 
 type Params = { params: Promise<{ type: string, id: string }> }
 
@@ -8,19 +8,14 @@ export async function GET(_request: Request, { params }: Params) {
   const decodedId = decodeURIComponent(id)
 
   try {
-    const profile = await fetchSyntheticProfile() as { base_url?: string }
-    const baseUrl = profile.base_url?.replace(/\/$/, '')
-    if (!baseUrl) {
-      return NextResponse.json({ message: 'Profile missing base_url' }, { status: 502 })
-    }
-
-    const url = `${baseUrl}/${encodeURIComponent(type)}/${encodeURIComponent(decodedId)}`
-    const res = await fetch(url, { cache: 'no-store' })
+    const { res, url } = await fetchVmFhir(
+      `/${encodeURIComponent(type)}/${encodeURIComponent(decodedId)}`
+    )
     const body = res.ok ? await res.json() : await res.text()
 
     if (!res.ok) {
       return NextResponse.json(
-        { message: 'VM FHIR read failed', status: res.status, detail: body },
+        { message: 'VM FHIR read failed', status: res.status, detail: body, source: url },
         { status: res.status === 404 ? 404 : 502 }
       )
     }

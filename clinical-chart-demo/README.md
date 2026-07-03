@@ -49,7 +49,25 @@ The Home page (`/`) shows both URLs for your environment.
 1. Patients list shows `pat_{connection_seed}_01` style IDs
 2. Chart page loads Condition / AllergyIntolerance / Observation / Composition samples
 3. **`/clinical`** — run `allergy_documented` or inject `oru_r01_allergy` → webhooks on `/events` (auto-refreshes every 2s)
-4. **`/parity`** — first control-plane Patient ID matches VM FHIR when sidecar is running
+4. **`/parity`** — first control-plane Patient ID matches VM FHIR when sidecar is running (uses `profile.host_base_url` on `127.0.0.1`, not guest `10.8.0.2`)
+
+### VM FHIR reachability
+
+The synthetic EHR profile returns two URLs:
+
+| Field | Audience |
+|-------|----------|
+| `base_url` | In-mesh / sidecar WireGuard (`http://10.8.0.2:8090/fhir/R4`) |
+| `host_base_url` | Host dev machine via QEMU port-forward (`http://127.0.0.1:{health_port+4}/fhir/R4`) |
+
+`/parity` and `/api/hebrah/vm-fhir/*` prefer `host_base_url`, then `HEBRAH_VM_FHIR_BASE_URL`, then `base_url`.
+
+If parity shows **fetch failed**:
+
+1. Ensure a **running** sidecar VM exists for your connection (`fc-sa-{connection_id}`)
+2. Use host orchestrator with real VMs (`bash scripts/dev-orchestrator-microvm.sh`), not Docker simulated-only
+3. Restart or reprovision the VM after updating `hebrah-vm-templates` (FHIR port-forward on `health_host_port + 4`)
+4. Or set `HEBRAH_VM_FHIR_BASE_URL` manually in `.env`
 
 ## Related docs
 

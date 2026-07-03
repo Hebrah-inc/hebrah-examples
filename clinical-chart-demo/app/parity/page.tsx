@@ -1,25 +1,38 @@
 import { defaultPatientId } from '@/lib/connection-patient'
-import { fetchResource, fetchResourceList, fetchSyntheticProfile } from '@/lib/hebrah-api'
+import { fetchResourceList, fetchSyntheticProfile } from '@/lib/hebrah-api'
+import { getPublicAppUrl } from '@/lib/env'
+import { resolveVmFhirBaseUrl } from '@/lib/vm-fhir'
 
-async function fetchVmPatientBundle(baseUrl: string) {
-  const url = `${baseUrl.replace(/\/$/, '')}/Patient?_count=5`
-  const res = await fetch(url, { cache: 'no-store' })
+async function fetchVmPatientBundle(appUrl: string) {
+  const res = await fetch(
+    `${appUrl}/api/hebrah/vm-fhir/Patient?_count=5`,
+    { cache: 'no-store' }
+  )
   if (!res.ok) {
-    throw new Error(`VM FHIR Patient search failed (${res.status})`)
+    const detail = await res.json().catch(() => ({})) as { message?: string }
+    throw new Error(detail.message ?? `VM FHIR Patient search failed (${res.status})`)
   }
-  return res.json() as Promise<{
-    entry?: Array<{ resource?: { id?: string, resourceType?: string } }>
-  }>
+  const data = await res.json() as {
+    bundle?: { entry?: Array<{ resource?: { id?: string, resourceType?: string } }> }
+    source?: string
+  }
+  return {
+    bundle: data.bundle ?? {},
+    source: data.source ?? null
+  }
 }
 
 export default async function ParityPage() {
   const expectedPatientId = defaultPatientId()
+  const appUrl = getPublicAppUrl().replace(/\/$/, '')
   let controlPlaneIds: string[] = []
   let controlPlaneError: string | null = null
   let profile: Record<string, unknown> | null = null
+  let vmFhirBaseUrl: string | null = null
   let vmPatientIds: string[] = []
   let vmError: string | null = null
   let vmPatientResource: Record<string, unknown> | null = null
+  let vmFetchSource: string | null = null
 
   try {
     const list = await fetchResourceList('Patient')
@@ -30,9 +43,10 @@ export default async function ParityPage() {
 
   try {
     profile = await fetchSyntheticProfile()
-    const baseUrl = String(profile.base_url ?? '')
-    if (baseUrl) {
-      const bundle = await fetchVmPatientBundle(baseUrl)
+    vmFhirBaseUrl = resolveVmFhirBaseUrl(profile as { base_url?: string, host_base_url?: string })
+    if (vmFhirBaseUrl) {
+      const { bundle, source } = await fetchVmPatientBundle(appUrl)
+      vmFetchSource = source
       vmPatientIds = (bundle.entry ?? [])
         .map(entry => entry.resource?.id)
         .filter((id): id is string => Boolean(id))
@@ -40,7 +54,7 @@ export default async function ParityPage() {
       const targetId = vmPatientIds[0] ?? expectedPatientId
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3009'}/api/hebrah/vm-fhir/Patient/${encodeURIComponent(targetId)}`,
+          `${appUrl}/api/hebrah/vm-fhir/Patient/${encodeURIComponent(targetId)}`,
           { cache: 'no-store' }
         )
         if (res.ok) {
@@ -50,6 +64,12 @@ export default async function ParityPage() {
       } catch {
         // Optional single-resource read; list parity is enough
       }
+    } else if (profile?.base_url) {
+      vmError = 'No host-reachable VM FHIR URL (profile.host_base_url missing). '
+        + 'Provision a running sidecar VM with host orchestrator (not Docker simulated-only), '
+        + 'or set HEBRAH_VM_FHIR_BASE_URL in .env.'
+    } else {
+      vmError = 'Profile missing VM FHIR base URL'
     }
   } catch (e) {
     vmError = e instanceof Error ? e.message : 'VM FHIR unreachable'
@@ -58,13 +78,17 @@ export default async function ParityPage() {
   const firstControlPlane = controlPlaneIds[0] ?? '—'
   const firstVm = vmPatientIds[0] ?? '—'
   const idsMatch = firstControlPlane !== '—' && firstControlPlane === firstVm
+  const guestBaseUrl = String(profile?.base_url ?? 'profile unavailable')
+  const hostBaseUrl = profile?.host_base_url ? String(profile.host_base_url) : null
 
   return (
     <main>
       <h2>Control plane vs VM FHIR parity</h2>
       <p style={{ color: '#666', fontSize: '0.875rem' }}>
         Compares connection-scoped patient IDs from the control plane with the sidecar VM FHIR store.
-        Requires a provisioned sandbox VM (WireGuard / sidecar on <code>10.8.0.2:8090</code>).
+        VM reads use <code>host_base_url</code> from the synthetic EHR profile (localhost port-forward)
+        or <code>HEBRAH_VM_FHIR_BASE_URL</code> — not the guest WireGuard address (
+        <code>10.8.0.2:8090</code>), which is not reachable from your Mac.
       </p>
 
       <section style={{ marginTop: '1.5rem' }}>
@@ -78,6 +102,14 @@ export default async function ParityPage() {
             {vmError ? 'VM unreachable' : idsMatch ? 'IDs match' : 'Mismatch'}
           </strong>
         </p>
+        {vmFhirBaseUrl && (
+          <p style={{ fontSize: '0.875rem', color: '#666' }}>
+            VM FHIR endpoint: <code>{vmFhirBaseUrl}</code>
+            {vmFetchSource && vmFetchSource !== vmFhirBaseUrl && (
+              <> (fetched via <code>{vmFetchSource}</code>)</>
+            )}
+          </p>
+        )}
       </section>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
@@ -91,7 +123,16 @@ export default async function ParityPage() {
         </section>
 
         <section>
-          <h3>VM FHIR ({String(profile?.base_url ?? 'profile unavailable')})</h3>
+          <h3>VM FHIR</h3>
+          <p style={{ fontSize: '0.8rem', color: '#666' }}>
+            Guest: <code>{guestBaseUrl}</code>
+            {hostBaseUrl && (
+              <>
+                <br />
+                Host: <code>{hostBaseUrl}</code>
+              </>
+            )}
+          </p>
           {vmError && <p style={{ color: 'crimson' }}>{vmError}</p>}
           <p>First Patient ID: <code>{firstVm}</code></p>
           <pre style={{ background: '#f4f4f4', padding: '0.75rem', fontSize: '0.8rem', overflow: 'auto' }}>
