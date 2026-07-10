@@ -1,6 +1,6 @@
 # clinical-chart-demo
 
-Reference Next.js app for **synthetic EHR clinical chart** integration: connection-scoped patient IDs, chart reads via `GET /v1/sandbox/resources`, multi-scenario clinical triggers, HL7 inject, and webhook inbox.
+Reference Next.js app for **synthetic EHR clinical chart** integration: connection-scoped patient IDs, chart reads via `GET /v1/sandbox/resources`, multi-scenario clinical triggers, HL7 inject, outbound chart-note writeback, and webhook inbox.
 
 Runs on port **3009**.
 
@@ -39,7 +39,7 @@ The Home page (`/`) shows both URLs for your environment.
 |-------|---------|
 | `/` | Synthetic EHR profile + env checklist |
 | `/patients` | Connection-scoped patient ID list |
-| `/chart/[id]` | Demographics, problems, allergies, vitals, notes |
+| `/chart/[id]` | Demographics, problems, allergies, vitals, notes + **Save note to EHR** writeback |
 | `/clinical` | Scenario picker + HL7 clinical inject |
 | `/parity` | Control-plane vs VM FHIR patient ID comparison |
 | `/events` | Inbound webhook inbox (filter by event type) |
@@ -48,8 +48,9 @@ The Home page (`/`) shows both URLs for your environment.
 
 1. Patients list shows `pat_{connection_seed}_01` style IDs
 2. Chart page loads Condition / AllergyIntolerance / Observation / Composition samples
-3. **`/clinical`** — run `allergy_documented` or inject `oru_r01_allergy` → webhooks on `/events` (auto-refreshes every 2s)
-4. **`/parity`** — first control-plane Patient ID matches VM FHIR when sidecar is running (uses `profile.host_base_url`, not guest `10.8.0.2`)
+3. **Chart → Save note to EHR** — submit note text → see `wb_comp_*` in Notes and `sidecar.writeback.succeeded` on `/events`
+4. **`/clinical`** — run `allergy_documented` or inject `oru_r01_allergy` → webhooks on `/events` (auto-refreshes every 2s)
+5. **`/parity`** — first control-plane Patient ID matches VM FHIR when sidecar is running (uses `profile.host_base_url`, not guest `10.8.0.2`)
 
 ### VM FHIR reachability
 

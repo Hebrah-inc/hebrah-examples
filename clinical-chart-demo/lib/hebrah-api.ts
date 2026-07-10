@@ -89,6 +89,40 @@ export async function injectHl7(templateId: string, patientId: string) {
   return res.json()
 }
 
+export type ChartNoteType =
+  | 'progress'
+  | 'soap'
+  | 'admission'
+  | 'discharge'
+  | 'operative'
+  | 'nursing'
+
+export type ChartNoteWritebackResult = {
+  status: string
+  composition_id: string
+  correlation_id?: string | null
+  webhook_event?: string | null
+  webhook_delivered?: boolean
+}
+
+export async function writeChartNote(
+  patientId: string,
+  noteText: string,
+  noteType: ChartNoteType = 'progress'
+) {
+  const connectionId = getConnectionId()
+  const res = await hebrahFetch('/v1/writeback/chart-note', {
+    method: 'POST',
+    body: JSON.stringify({
+      patient_id: patientId,
+      note_text: noteText,
+      note_type: noteType,
+      ...(connectionId ? { connection_id: connectionId } : {})
+    })
+  })
+  return res.json() as Promise<ChartNoteWritebackResult>
+}
+
 export async function fetchSandboxDomains() {
   const res = await hebrahFetch('/v1/sandbox/domains')
   return res.json() as Promise<Array<{
