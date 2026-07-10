@@ -66,13 +66,20 @@ export default async function ParityPage() {
       }
     } else if (profile?.base_url) {
       vmError = 'No host-reachable VM FHIR URL (profile.host_base_url missing). '
-        + 'Provision a running sidecar VM with host orchestrator (not Docker simulated-only), '
+        + 'Point hebrah-api ORCHESTRATOR_URL at a running Firecracker/QEMU orchestrator '
+        + '(not Docker simulated-only), ensure the sidecar VM is running, '
         + 'or set HEBRAH_VM_FHIR_BASE_URL in .env.'
     } else {
       vmError = 'Profile missing VM FHIR base URL'
     }
   } catch (e) {
-    vmError = e instanceof Error ? e.message : 'VM FHIR unreachable'
+    const msg = e instanceof Error ? e.message : 'VM FHIR unreachable'
+    const usingGuest = Boolean(vmFhirBaseUrl?.includes('10.8.0.2'))
+    vmError = usingGuest
+      ? `${msg} — guest WireGuard URL is not reachable from your Mac. `
+        + 'Need profile.host_base_url (hebrah-api ORCHESTRATOR_URL → real orchestrator) '
+        + 'or HEBRAH_VM_FHIR_BASE_URL.'
+      : msg
   }
 
   const firstControlPlane = controlPlaneIds[0] ?? '—'

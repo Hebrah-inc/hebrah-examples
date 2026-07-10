@@ -6,6 +6,15 @@ export type SyntheticEhrProfileLike = {
   fhir_base_path?: string
 }
 
+function isGuestWireguardUrl(url: string): boolean {
+  try {
+    const host = new URL(url).hostname
+    return host === '10.8.0.2' || host.startsWith('10.8.')
+  } catch {
+    return url.includes('10.8.0.2')
+  }
+}
+
 /** Prefer host-reachable VM FHIR URL over guest WireGuard address (10.8.0.2). */
 export function resolveVmFhirBaseUrl(
   profile: SyntheticEhrProfileLike,
@@ -18,8 +27,12 @@ export function resolveVmFhirBaseUrl(
   if (hostBase) return hostBase.replace(/\/$/, '')
 
   const guestBase = profile.base_url?.trim()
-  return guestBase ? guestBase.replace(/\/$/, '') : null
+  if (!guestBase) return null
+  // Guest mesh addresses are not reachable from the Mac demo process.
+  if (isGuestWireguardUrl(guestBase)) return null
+  return guestBase.replace(/\/$/, '')
 }
+
 
 export async function loadVmFhirBaseUrl(): Promise<string> {
   const profile = await fetchSyntheticProfile() as SyntheticEhrProfileLike
