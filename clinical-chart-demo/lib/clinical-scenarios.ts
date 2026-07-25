@@ -28,7 +28,7 @@ export const FALLBACK_CLINICAL_SCENARIOS: ClinicalScenarioOption[] = [
 export const DEFAULT_HL7_TEMPLATES: ClinicalScenarioOption[] = [
   { id: 'oru_r01_problem', label: 'ORU — problem added' },
   { id: 'oru_r01_allergy', label: 'ORU — allergy documented' },
-  { id: 'oru_r01_vitals', label: 'ORU — vital recorded' },
+  { id: 'oru_r01_vital', label: 'ORU — vital recorded' },
   { id: 'mdm_t02_note', label: 'MDM — note signed' },
   { id: 'vxu_v04_immunization', label: 'VXU — immunization' },
   { id: 'ref_i13_referral', label: 'REF — referral completed' },
