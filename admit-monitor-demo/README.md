@@ -6,12 +6,12 @@ Runs on port **3002** (see [hebrah-examples/README.md](../README.md)).
 
 ## Prerequisites
 
-1. hebrah-api + hebrah-app + **hebrah-mcp-host** ([documentation/local-development.md](../../documentation/local-development.md))
-2. hebrah onboarding credentials (`hbsec_*`, `hb_test_*`)
-3. Universal PAT from hebrah-app **Settings → MCP** (`hb_pat_*`)
-4. `HEBRAH_SANDBOX_API_KEY` on **hebrah-mcp-host** `.env` (for `trigger_test_webhook`)
+1. hebrah-api + hebrah-app + **[hebrah-mcp-host](https://github.com/Hebrah-inc/hebrah-mcp-host)** running locally. See the umbrella repo's [local development guide](https://github.com/Hebrah-inc/hebrah/blob/main/documentation/local-development.md).
+2. Hebrah onboarding credentials — request access at [hebrah.com/request-demo](https://hebrah.com/request-demo) and copy `hb_test_*` (API key) and `hbsec_*` (webhook secret).
+3. Universal PAT from the Hebrah dashboard → **Settings → MCP** (`hb_pat_*`).
+4. `HEBRAH_SANDBOX_API_KEY` (`hb_test_...`) on **hebrah-mcp-host** `.env` (for `trigger_test_webhook`).
 
-Quick path: [documentation/agent-quickstart.md](../../documentation/agent-quickstart.md).
+Quick path: [agent quickstart](https://github.com/Hebrah-inc/hebrah/blob/main/documentation/agent-quickstart.md).
 
 ## Setup
 
