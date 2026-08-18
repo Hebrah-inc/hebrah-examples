@@ -36,4 +36,4 @@ curl -s -X POST http://localhost:3004/api/mode \
 2. `list_webhook_deliveries` — observe `pending` + retry
 3. Set relay to `healthy`, wait for retry or `replay_webhook_delivery`
 
-See [documentation/agent-quickstart.md](../../documentation/agent-quickstart.md) Track E.
+See the umbrella repo's [agent quickstart](https://github.com/Hebrah-inc/hebrah/blob/main/documentation/agent-quickstart.md) (Track E) for the full reliability testing recipe.

@@ -6,10 +6,10 @@ Runs on port **3001** by default (see [hebrah-examples/README.md](../README.md) 
 
 ## Prerequisites
 
-1. Start hebrah-api and hebrah-app ([documentation/local-development.md](../../documentation/local-development.md))
-2. Complete hebrah onboarding and copy sandbox credentials from Step 2 (`hb_test_*`, `hbsec_*`, connection ID `conn-sa-...`)
+1. Start hebrah-api locally (Docker Compose) or point `HEBRAH_API_BASE_URL` at the hosted control plane. See the umbrella repo's [local development guide](https://github.com/Hebrah-inc/hebrah/blob/main/documentation/local-development.md).
+2. Complete Hebrah onboarding at [hebrah.com/request-demo](https://hebrah.com/request-demo) and copy your sandbox credentials (`hb_test_*`, `hbsec_*`, connection ID `conn-sa-...`).
 
-See [documentation/agent-quickstart.md](../../documentation/agent-quickstart.md) for a full local setup guide.
+See the [agent quickstart](https://github.com/Hebrah-inc/hebrah/blob/main/documentation/agent-quickstart.md) for a 15-minute end-to-end setup.
 
 ## Setup
 

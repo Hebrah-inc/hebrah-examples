@@ -6,9 +6,9 @@ Runs on port **3009**.
 
 ## Prerequisites
 
-1. hebrah-api + hebrah-app running ([documentation/local-development.md](../../documentation/local-development.md))
-2. Sandbox connection with sidecar VM (for `/parity` VM FHIR smoke)
-3. `hb_test_*`, `hbsec_*`, and your sandbox **connection ID**
+1. hebrah-api + hebrah-app running locally. See the umbrella repo's [local development guide](https://github.com/Hebrah-inc/hebrah/blob/main/documentation/local-development.md).
+2. Sandbox connection with a running sidecar VM (for `/parity` VM FHIR smoke). See [hebrah-vm-templates](https://github.com/Hebrah-inc/hebrah-vm-templates) for VM setup.
+3. `hb_test_*`, `hbsec_*`, and your sandbox **connection ID** — request access at [hebrah.com/request-demo](https://hebrah.com/request-demo).
 
 ## Setup
 
@@ -66,10 +66,10 @@ If parity shows **fetch failed** or only the guest `10.8.0.2` URL:
 
 1. Ensure a **running** sidecar VM exists for your connection (`fc-sa-{connection_id}`)
 2. Point **hebrah-api** at a real orchestrator (`ORCHESTRATOR_URL` in `hebrah-api/.env`) — Docker simulated-only leaves `host_base_url` null
-3. **Ubuntu hybrid:** set `ORCHESTRATOR_URL=http://<ubuntu-ip>:8090` on both hebrah-app and hebrah-api; stop Compose `orchestrator`; reprovision the VM after PREROUTING DNAT updates (see [firecracker-ubuntu-hybrid-dev.md](../../documentation/firecracker-ubuntu-hybrid-dev.md))
+3. **Hybrid dev (Ubuntu + Mac):** set `ORCHESTRATOR_URL=http://<ubuntu-ip>:8090` on both hebrah-app and hebrah-api, stop Compose `orchestrator`, and reprovision the VM after PREROUTING DNAT updates. See the umbrella repo's [hybrid dev guide](https://github.com/Hebrah-inc/hebrah/blob/main/documentation/firecracker-ubuntu-hybrid-dev.md).
 4. Or set `HEBRAH_VM_FHIR_BASE_URL` manually in `.env`
 
 ## Related docs
 
-- [release-2026-12-synthetic-ehr-phase7.md](../../documentation/release-2026-12-synthetic-ehr-phase7.md)
-- [release-2026-07-synthetic-ehr-rollout.md](../../documentation/release-2026-07-synthetic-ehr-rollout.md)
+- [Synthetic EHR rollout (July 2026)](https://github.com/Hebrah-inc/hebrah/blob/main/documentation/release-2026-07-synthetic-ehr-rollout.md)
+- [Synthetic EHR Phase 7 (Dec 2026)](https://github.com/Hebrah-inc/hebrah/blob/main/documentation/release-2026-12-synthetic-ehr-phase7.md)
