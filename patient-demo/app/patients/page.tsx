@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { fetchPatient, fetchPatientList } from '@/lib/hebrah-api'
 import { HebrahApiError } from '@/lib/hebrah-api'
-import { parsePatient, patientDisplayName, patientMrn } from '@/lib/fhir'
+import { parsePatient, patientArchetype, patientCkdStage, patientDisplayName, patientMrn } from '@/lib/fhir'
 
 export default async function PatientsPage() {
   let patients: Array<{
@@ -20,12 +21,14 @@ export default async function PatientsPage() {
     gender: string
     birthDate: string
     mrn: string
+    ckdStage?: string | null
+    archetype?: string | null
   }> = []
   let error: string | null = null
 
   try {
     const list = await fetchPatientList()
-    const ids = list.patients.slice(0, 5)
+    const ids = list.patients.slice(0, 20)
     patients = await Promise.all(
       ids.map(async ({ id }) => {
         const raw = await fetchPatient(id)
@@ -35,7 +38,9 @@ export default async function PatientsPage() {
           name: patientDisplayName(patient),
           gender: patient.gender ?? '—',
           birthDate: patient.birthDate ?? '—',
-          mrn: patientMrn(patient)
+          mrn: patientMrn(patient),
+          ckdStage: patientCkdStage(patient),
+          archetype: patientArchetype(patient)
         }
       })
     )
@@ -54,7 +59,7 @@ export default async function PatientsPage() {
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Patients</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Synthetic FHIR patients from the While sandbox control plane.
+          Synthetic FHIR patients & geriatric longitudinal cohorts from the hebrah control plane.
         </p>
       </div>
 
@@ -68,13 +73,14 @@ export default async function PatientsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Patient list</CardTitle>
-          <CardDescription>{patients.length} patients for your organization</CardDescription>
+          <CardDescription>{patients.length} patients available in sandbox</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
+                <TableHead>Clinical Cohort / Archetype</TableHead>
                 <TableHead>Patient ID</TableHead>
                 <TableHead>MRN</TableHead>
                 <TableHead>Gender</TableHead>
@@ -85,19 +91,35 @@ export default async function PatientsPage() {
               {patients.map(patient => (
                 <TableRow key={patient.id}>
                   <TableCell>
-                    <Link href={`/patients/${patient.id}`} className="font-medium hover:underline">
+                    <Link href={`/patients/${patient.id}`} className="font-semibold text-foreground hover:underline">
                       {patient.name}
                     </Link>
                   </TableCell>
-                  <TableCell className="font-mono text-xs">{patient.id}</TableCell>
-                  <TableCell className="font-mono text-xs">{patient.mrn}</TableCell>
-                  <TableCell className="capitalize">{patient.gender}</TableCell>
-                  <TableCell>{patient.birthDate}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {patient.ckdStage && (
+                        <Badge variant="outline" className="text-[10px] border-amber-600/40 text-amber-700 bg-amber-500/10 font-mono">
+                          CKD {patient.ckdStage}
+                        </Badge>
+                      )}
+                      {patient.archetype ? (
+                        <span className="text-xs text-muted-foreground capitalize">
+                          {patient.archetype.replace(/_/g, ' ')}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Standard Ambulatory</span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">{patient.id}</TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">{patient.mrn}</TableCell>
+                  <TableCell className="capitalize text-xs">{patient.gender}</TableCell>
+                  <TableCell className="text-xs font-mono">{patient.birthDate}</TableCell>
                 </TableRow>
               ))}
               {!patients.length && !error && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     No patients found
                   </TableCell>
                 </TableRow>

@@ -73,6 +73,15 @@ export async function fetchSandboxCatalog() {
 }
 
 export async function fetchPatientList() {
+  try {
+    const res = await hebrahFetch('/v1/sandbox/resources/Patient')
+    const data = (await res.json()) as { ids?: string[] }
+    if (Array.isArray(data.ids) && data.ids.length > 0) {
+      return { patients: data.ids.map(id => ({ id })) }
+    }
+  } catch {
+    // Fallback to /v1/patients
+  }
   const res = await hebrahFetch('/v1/patients')
   return res.json() as Promise<PatientListResponse>
 }
@@ -80,6 +89,78 @@ export async function fetchPatientList() {
 export async function fetchPatient(patientId: string) {
   const res = await hebrahFetch(`/v1/patients/${encodeURIComponent(patientId)}`)
   return res.json() as Promise<Record<string, unknown>>
+}
+
+export async function fetchPatientMedications(patientId: string): Promise<Record<string, unknown>[]> {
+  try {
+    const listRes = await hebrahFetch(`/v1/sandbox/resources/MedicationRequest?patient_id=${encodeURIComponent(patientId)}`)
+    const data = (await listRes.json()) as { ids?: string[] }
+    const ids = data.ids || []
+    if (ids.length === 0) return []
+    const items = await Promise.all(
+      ids.slice(0, 40).map(async (id) => {
+        try {
+          const res = await hebrahFetch(
+            `/v1/sandbox/resources/MedicationRequest/${encodeURIComponent(id)}?patient_id=${encodeURIComponent(patientId)}`
+          )
+          return await res.json()
+        } catch {
+          return null
+        }
+      })
+    )
+    return items.filter(Boolean) as Record<string, unknown>[]
+  } catch {
+    return []
+  }
+}
+
+export async function fetchPatientObservations(patientId: string): Promise<Record<string, unknown>[]> {
+  try {
+    const listRes = await hebrahFetch(`/v1/sandbox/resources/Observation?patient_id=${encodeURIComponent(patientId)}`)
+    const data = (await listRes.json()) as { ids?: string[] }
+    const ids = data.ids || []
+    if (ids.length === 0) return []
+    const items = await Promise.all(
+      ids.slice(0, 50).map(async (id) => {
+        try {
+          const res = await hebrahFetch(
+            `/v1/sandbox/resources/Observation/${encodeURIComponent(id)}?patient_id=${encodeURIComponent(patientId)}`
+          )
+          return await res.json()
+        } catch {
+          return null
+        }
+      })
+    )
+    return items.filter(Boolean) as Record<string, unknown>[]
+  } catch {
+    return []
+  }
+}
+
+export async function fetchPatientConditions(patientId: string): Promise<Record<string, unknown>[]> {
+  try {
+    const listRes = await hebrahFetch(`/v1/sandbox/resources/Condition?patient_id=${encodeURIComponent(patientId)}`)
+    const data = (await listRes.json()) as { ids?: string[] }
+    const ids = data.ids || []
+    if (ids.length === 0) return []
+    const items = await Promise.all(
+      ids.slice(0, 20).map(async (id) => {
+        try {
+          const res = await hebrahFetch(
+            `/v1/sandbox/resources/Condition/${encodeURIComponent(id)}?patient_id=${encodeURIComponent(patientId)}`
+          )
+          return await res.json()
+        } catch {
+          return null
+        }
+      })
+    )
+    return items.filter(Boolean) as Record<string, unknown>[]
+  } catch {
+    return []
+  }
 }
 
 export async function triggerMockEvent(event: string, patientId?: string) {

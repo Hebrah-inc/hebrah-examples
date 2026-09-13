@@ -44,6 +44,27 @@ export function PatientActions({ patientId }: { patientId: string }) {
       >
         {loading === 'patient.discharged' ? 'Sending…' : 'Discharge patient'}
       </Button>
+      <Button
+        variant="secondary"
+        disabled={Boolean(loading)}
+        onClick={() => trigger('medication.refilled')}
+      >
+        {loading === 'medication.refilled' ? 'Sending…' : 'Refill medication (priorPrescription)'}
+      </Button>
+      <Button
+        variant="secondary"
+        disabled={Boolean(loading)}
+        onClick={() => trigger('lab.resulted')}
+      >
+        {loading === 'lab.resulted' ? 'Sending…' : 'Result renal lab (CKD-EPI)'}
+      </Button>
+      <Button
+        variant="ghost"
+        disabled={Boolean(loading)}
+        onClick={() => trigger('vital.recorded')}
+      >
+        {loading === 'vital.recorded' ? 'Sending…' : 'Record vitals'}
+      </Button>
     </div>
   )
 }
