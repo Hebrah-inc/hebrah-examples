@@ -18,6 +18,14 @@ export function getWebhookSecret() {
   return secret
 }
 
+export function getHebrahConnectionId() {
+  return (
+    process.env.HEBRAH_CONNECTION_ID ||
+    process.env.WHILE_CONNECTION_ID ||
+    undefined
+  )
+}
+
 export function getPublicAppUrl() {
   return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3001'
 }

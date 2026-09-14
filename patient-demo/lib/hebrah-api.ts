@@ -1,109 +1,79 @@
-import { getHebrahApiBaseUrl, getHebrahApiKey } from './env'
+// patient-demo — Hebrah control-plane access via the official SDK.
+//
+// Demo Act 3 exercises the real `@hebrah/sdk` surface end-to-end. This
+// module keeps the same exported function signatures the demo components
+// already import, so the migration from hand-rolled fetch is invisible
+// to the UI: every call now goes through `HebrahClient` (typed client,
+// timeouts, error contract) instead of bespoke fetch plumbing.
 
-export class HebrahApiError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-    public detail?: string
-  ) {
-    super(message)
-    this.name = 'HebrahApiError'
-  }
-}
+import {
+  HebrahApiError,
+  HebrahClient,
+  type PatientListResponse,
+  type SandboxCatalog,
+  type TriggerMockEventResponse
+} from '@hebrah/sdk'
 
-async function hebrahFetch(path: string, init?: RequestInit) {
-  const base = getHebrahApiBaseUrl().replace(/\/$/, '')
-  const apiKey = getHebrahApiKey()
+import { getHebrahApiBaseUrl, getHebrahApiKey, getHebrahConnectionId } from './env'
 
-  let response: Response
-  try {
-    response = await fetch(`${base}${path}`, {
-      ...init,
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
-        ...init?.headers
-      }
+export { HebrahApiError }
+
+export type { SandboxCatalog, PatientListResponse, TriggerMockEventResponse }
+
+let _client: HebrahClient | undefined
+
+/** Singleton SDK client configured from the demo's env contract. */
+export function hebrahClient(): HebrahClient {
+  if (!_client) {
+    _client = new HebrahClient({
+      apiKey: getHebrahApiKey(),
+      baseUrl: getHebrahApiBaseUrl(),
+      defaultConnectionId: getHebrahConnectionId()
     })
-  } catch {
-    throw new HebrahApiError(
-      `Control plane unreachable at ${base}. Is hebrah-api running?`,
-      503
-    )
   }
-
-  if (!response.ok) {
-    const detail = await response.text()
-    throw new HebrahApiError(
-      `Control plane request failed (${response.status})`,
-      response.status,
-      detail
-    )
-  }
-
-  return response
+  return _client
 }
 
-export interface SandboxCatalog {
-  org_id: string
-  org_name: string
-  connection_id: string
-  environment: string
-  sample_patient_ids: string[]
-  supported_events: string[]
-  example_patient_response: Record<string, unknown>
-  example_webhook_envelope: Record<string, unknown>
+export async function fetchSandboxCatalog(): Promise<SandboxCatalog> {
+  return hebrahClient().sandbox.catalog()
 }
 
-export interface PatientListResponse {
-  patients: Array<{ id: string }>
-}
-
-export interface TriggerMockEventResponse {
-  status: string
-  event: string
-  patient_id?: string
-  connection_id: string
-  envelope_preview: Record<string, unknown>
-}
-
-export async function fetchSandboxCatalog() {
-  const res = await hebrahFetch('/v1/sandbox/catalog')
-  return res.json() as Promise<SandboxCatalog>
-}
-
-export async function fetchPatientList() {
+export async function fetchPatientList(): Promise<PatientListResponse> {
+  const client = hebrahClient()
   try {
-    const res = await hebrahFetch('/v1/sandbox/resources/Patient')
-    const data = (await res.json()) as { ids?: string[] }
-    if (Array.isArray(data.ids) && data.ids.length > 0) {
-      return { patients: data.ids.map(id => ({ id })) }
+    const res = await client.sandbox.listSyntheticResources('Patient')
+    if (Array.isArray(res.ids) && res.ids.length > 0) {
+      return { patients: res.ids.map(id => ({ id })) }
     }
   } catch {
-    // Fallback to /v1/patients
+    // Fall back to the /v1/patients surface via the SDK.
   }
-  const res = await hebrahFetch('/v1/patients')
-  return res.json() as Promise<PatientListResponse>
+  return client.patients.list()
 }
 
-export async function fetchPatient(patientId: string) {
-  const res = await hebrahFetch(`/v1/patients/${encodeURIComponent(patientId)}`)
-  return res.json() as Promise<Record<string, unknown>>
+export async function fetchPatient(patientId: string): Promise<Record<string, unknown>> {
+  return hebrahClient().patients.get(patientId)
 }
 
-export async function fetchPatientMedications(patientId: string): Promise<Record<string, unknown>[]> {
+/**
+ * List a sandbox resource type for a patient, then hydrate each id with a
+ * patient-scoped detail read — the FHIR R4 MedicationRequest /
+ * Observation / Condition charts the demo renders.
+ */
+async function fetchPatientResources(
+  resourceType: 'MedicationRequest' | 'Observation' | 'Condition',
+  patientId: string,
+  limit: number
+): Promise<Record<string, unknown>[]> {
+  const client = hebrahClient()
   try {
-    const listRes = await hebrahFetch(`/v1/sandbox/resources/MedicationRequest?patient_id=${encodeURIComponent(patientId)}`)
-    const data = (await listRes.json()) as { ids?: string[] }
-    const ids = data.ids || []
+    const listRes = await client.sandbox.listSyntheticResources(resourceType)
+    const ids = Array.isArray(listRes.ids) ? listRes.ids : []
     if (ids.length === 0) return []
     const items = await Promise.all(
-      ids.slice(0, 40).map(async (id) => {
+      ids.slice(0, limit).map(async (id) => {
         try {
-          const res = await hebrahFetch(
-            `/v1/sandbox/resources/MedicationRequest/${encodeURIComponent(id)}?patient_id=${encodeURIComponent(patientId)}`
-          )
-          return await res.json()
+          return await client.sandbox.resource(resourceType, id, patientId)
         } catch {
           return null
         }
@@ -115,61 +85,24 @@ export async function fetchPatientMedications(patientId: string): Promise<Record
   }
 }
 
-export async function fetchPatientObservations(patientId: string): Promise<Record<string, unknown>[]> {
-  try {
-    const listRes = await hebrahFetch(`/v1/sandbox/resources/Observation?patient_id=${encodeURIComponent(patientId)}`)
-    const data = (await listRes.json()) as { ids?: string[] }
-    const ids = data.ids || []
-    if (ids.length === 0) return []
-    const items = await Promise.all(
-      ids.slice(0, 50).map(async (id) => {
-        try {
-          const res = await hebrahFetch(
-            `/v1/sandbox/resources/Observation/${encodeURIComponent(id)}?patient_id=${encodeURIComponent(patientId)}`
-          )
-          return await res.json()
-        } catch {
-          return null
-        }
-      })
-    )
-    return items.filter(Boolean) as Record<string, unknown>[]
-  } catch {
-    return []
-  }
+export function fetchPatientMedications(patientId: string): Promise<Record<string, unknown>[]> {
+  return fetchPatientResources('MedicationRequest', patientId, 40)
 }
 
-export async function fetchPatientConditions(patientId: string): Promise<Record<string, unknown>[]> {
-  try {
-    const listRes = await hebrahFetch(`/v1/sandbox/resources/Condition?patient_id=${encodeURIComponent(patientId)}`)
-    const data = (await listRes.json()) as { ids?: string[] }
-    const ids = data.ids || []
-    if (ids.length === 0) return []
-    const items = await Promise.all(
-      ids.slice(0, 20).map(async (id) => {
-        try {
-          const res = await hebrahFetch(
-            `/v1/sandbox/resources/Condition/${encodeURIComponent(id)}?patient_id=${encodeURIComponent(patientId)}`
-          )
-          return await res.json()
-        } catch {
-          return null
-        }
-      })
-    )
-    return items.filter(Boolean) as Record<string, unknown>[]
-  } catch {
-    return []
-  }
+export function fetchPatientObservations(patientId: string): Promise<Record<string, unknown>[]> {
+  return fetchPatientResources('Observation', patientId, 50)
 }
 
-export async function triggerMockEvent(event: string, patientId?: string) {
-  const res = await hebrahFetch('/v1/webhooks/trigger-mock-event', {
-    method: 'POST',
-    body: JSON.stringify({
-      event,
-      ...(patientId ? { patient_id: patientId } : {})
-    })
+export function fetchPatientConditions(patientId: string): Promise<Record<string, unknown>[]> {
+  return fetchPatientResources('Condition', patientId, 20)
+}
+
+export async function triggerMockEvent(
+  event: string,
+  patientId?: string
+): Promise<TriggerMockEventResponse> {
+  return hebrahClient().webhooks.triggerMockEvent({
+    event,
+    ...(patientId ? { patientId } : {})
   })
-  return res.json() as Promise<TriggerMockEventResponse>
 }

@@ -4,8 +4,13 @@ import { addWebhookEvent } from '@/lib/webhook-store'
 
 export async function POST(request: Request) {
   const rawBody = Buffer.from(await request.arrayBuffer())
-  const signature = request.headers.get('x-while-signature')
-  const eventType = request.headers.get('x-while-event') ?? 'unknown'
+  const signature =
+    request.headers.get('x-hebrah-signature') ??
+    request.headers.get('x-while-signature')
+  const eventType =
+    request.headers.get('x-hebrah-event') ??
+    request.headers.get('x-while-event') ??
+    'unknown'
 
   let payload: Record<string, unknown>
   try {

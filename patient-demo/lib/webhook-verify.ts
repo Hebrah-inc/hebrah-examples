@@ -1,18 +1,15 @@
-import { createHmac, timingSafeEqual } from 'crypto'
+// Webhook signature verification — thin wrapper over the SDK's
+// `verifyWebhookSignature` (HMAC-SHA256, timing-safe compare).
+// The demo keeps its boolean contract; the SDK returns the parsed
+// envelope or throws, so we translate.
+
+import { verifyWebhookSignature as sdkVerifyWebhookSignature } from '@hebrah/sdk'
 import { getWebhookSecret } from './env'
 
-export function verifyWebhookSignature(rawBody: Buffer, signatureHeader: string | null) {
-  if (!signatureHeader) return false
-
-  const expected = createHmac('sha256', getWebhookSecret())
-    .update(rawBody)
-    .digest('hex')
-
+export function verifyWebhookSignature(rawBody: Buffer, signatureHeader: string | null): boolean {
   try {
-    return (
-      expected.length === signatureHeader.length &&
-      timingSafeEqual(Buffer.from(expected, 'utf8'), Buffer.from(signatureHeader, 'utf8'))
-    )
+    sdkVerifyWebhookSignature(rawBody, signatureHeader, getWebhookSecret())
+    return true
   } catch {
     return false
   }

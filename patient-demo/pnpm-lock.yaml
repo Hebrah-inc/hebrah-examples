@@ -11,6 +11,9 @@ importers:
       '@base-ui/react':
         specifier: ^1.5.0
         version: 1.5.0(@types/react@19.2.15)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@hebrah/sdk':
+        specifier: ^0.8.2
+        version: 0.8.2
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -307,6 +310,10 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
+
+  '@hebrah/sdk@0.8.2':
+    resolution: {integrity: sha512-NWFHTc9jYnsWLnZHmKBpB9mvUrHbhG/looKTldGfnrfqWEMLZ0TRC6OuzWiPrZ7WtPuD1ql/qP7uLmXIZEd3lQ==}
+    engines: {node: '>=18'}
 
   '@hono/node-server@1.19.14':
     resolution: {integrity: sha512-GwtvgtXxnWsucXvbQXkRgqksiH2Qed37H9xHZocE5sA3N8O8O8/8FA3uclQXxXVzc9XBZuEOMK7+r02FmSpHtw==}
@@ -3364,6 +3371,8 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
 
   '@floating-ui/utils@0.2.11': {}
+
+  '@hebrah/sdk@0.8.2': {}
 
   '@hono/node-server@1.19.14(hono@4.12.23)':
     dependencies:
