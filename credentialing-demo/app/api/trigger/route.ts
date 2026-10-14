@@ -1,28 +1,31 @@
 import { NextResponse } from 'next/server'
+import { HebrahApiError, HebrahClient } from '@hebrah/sdk'
 import { getDefaultPatientId, getHebrahApiBaseUrl, getHebrahApiKey } from '@/lib/env'
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as { patientId?: string }
   const patientId = body.patientId ?? getDefaultPatientId()
-  const base = getHebrahApiBaseUrl().replace(/\/$/, '')
 
-  const response = await fetch(`${base}/v1/sandbox/scenarios/credentialing_verify_practitioner/run`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${getHebrahApiKey()}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ patient_id: patientId })
+  const client = new HebrahClient({
+    apiKey: getHebrahApiKey(),
+    baseUrl: getHebrahApiBaseUrl(),
+    defaultConnectionId: process.env.HEBRAH_CONNECTION_ID || undefined,
+    environmentId: process.env.HEBRAH_ENVIRONMENT_ID || undefined
   })
 
-  const text = await response.text()
-  let parsed: unknown = text
   try {
-    parsed = JSON.parse(text)
-  } catch {}
-
-  if (!response.ok) {
-    return NextResponse.json({ message: 'Scenario trigger failed', detail: parsed }, { status: response.status })
+    const result = await client.sandbox.runScenario('credentialing_verify_practitioner', { patientId })
+    return NextResponse.json(result, { status: 202 })
+  } catch (err) {
+    if (err instanceof HebrahApiError) {
+      return NextResponse.json(
+        { message: 'Scenario trigger failed', detail: err.detail ?? err.message },
+        { status: err.status }
+      )
+    }
+    return NextResponse.json(
+      { message: err instanceof Error ? err.message : 'Scenario trigger failed' },
+      { status: 500 }
+    )
   }
-  return NextResponse.json(parsed, { status: 202 })
 }

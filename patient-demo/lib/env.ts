@@ -1,29 +1,29 @@
 export function getHebrahApiBaseUrl() {
-  return process.env.HEBRAH_API_BASE_URL ?? process.env.WHILE_API_BASE_URL ?? 'http://localhost:8000'
+  return process.env.HEBRAH_API_BASE_URL ?? 'http://localhost:8000'
 }
 
 export function getHebrahApiKey() {
-  const key =
-    process.env.HEBRAH_SANDBOX_API_KEY ||
-    process.env.WHILE_SANDBOX_API_KEY ||
-    'hb_test_d05c54d3c004bf7f84c050cc44471371'
+  const key = process.env.HEBRAH_SANDBOX_API_KEY || process.env.HEBRAH_API_KEY
+  if (!key) {
+    throw new Error('HEBRAH_SANDBOX_API_KEY (or HEBRAH_API_KEY) is not configured')
+  }
   return key
 }
 
 export function getWebhookSecret() {
-  const secret =
-    process.env.HEBRAH_WEBHOOK_SECRET ||
-    process.env.WHILE_WEBHOOK_SECRET ||
-    'hbsec_234dfa1a892b45e997f7faea5c9076ae'
+  const secret = process.env.HEBRAH_WEBHOOK_SECRET
+  if (!secret) {
+    throw new Error('HEBRAH_WEBHOOK_SECRET is not configured')
+  }
   return secret
 }
 
 export function getHebrahConnectionId() {
-  return (
-    process.env.HEBRAH_CONNECTION_ID ||
-    process.env.WHILE_CONNECTION_ID ||
-    undefined
-  )
+  return process.env.HEBRAH_CONNECTION_ID || undefined
+}
+
+export function getHebrahEnvironmentId() {
+  return process.env.HEBRAH_ENVIRONMENT_ID || undefined
 }
 
 export function getPublicAppUrl() {
@@ -33,8 +33,9 @@ export function getPublicAppUrl() {
 export function getEnvStatus() {
   return {
     apiBaseUrl: Boolean(process.env.HEBRAH_API_BASE_URL),
-    apiKey: Boolean(process.env.HEBRAH_SANDBOX_API_KEY),
+    apiKey: Boolean(process.env.HEBRAH_SANDBOX_API_KEY || process.env.HEBRAH_API_KEY),
     webhookSecret: Boolean(process.env.HEBRAH_WEBHOOK_SECRET),
+    environmentId: Boolean(process.env.HEBRAH_ENVIRONMENT_ID),
     publicAppUrl: getPublicAppUrl()
   }
 }

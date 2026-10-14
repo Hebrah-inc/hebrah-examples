@@ -7,15 +7,15 @@ export async function POST(request: Request) {
   const signature = request.headers.get('x-hebrah-signature')
   const eventType = request.headers.get('x-hebrah-event') ?? 'unknown'
 
+  if (!verifyWebhookSignature(rawBody, signature)) {
+    return NextResponse.json({ message: 'Invalid webhook signature' }, { status: 401 })
+  }
+
   let payload: Record<string, unknown>
   try {
     payload = JSON.parse(rawBody.toString('utf8')) as Record<string, unknown>
   } catch {
     return NextResponse.json({ message: 'Invalid JSON' }, { status: 400 })
-  }
-
-  if (!verifyWebhookSignature(rawBody, signature)) {
-    return NextResponse.json({ message: 'Invalid webhook signature' }, { status: 401 })
   }
 
   const resource = payload.resource as Record<string, unknown> | undefined

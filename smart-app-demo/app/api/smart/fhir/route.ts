@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
-import { getHebrahApiBaseUrl } from '@/lib/env'
+import { resolveSafeIssuer } from '@/lib/env'
+
+const ALLOWED_METHODS = new Set(['GET', 'POST'])
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as {
@@ -14,9 +16,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'path and accessToken are required' }, { status: 400 })
   }
 
-  const issuer = (body.iss ?? getHebrahApiBaseUrl()).replace(/\/$/, '')
+  const cleanPath = body.path.replace(/^\//, '')
+  if (cleanPath.includes('..') || cleanPath.includes('//') || cleanPath.startsWith('http')) {
+    return NextResponse.json({ message: 'Invalid FHIR path' }, { status: 400 })
+  }
+
   const method = (body.method ?? 'GET').toUpperCase()
-  const url = `${issuer}/fhir/R4/${body.path.replace(/^\//, '')}`
+  if (!ALLOWED_METHODS.has(method)) {
+    return NextResponse.json({ message: 'Unsupported HTTP method' }, { status: 400 })
+  }
+
+  let issuer: string
+  try {
+    issuer = resolveSafeIssuer(body.iss)
+  } catch (err) {
+    return NextResponse.json(
+      { message: err instanceof Error ? err.message : 'Invalid issuer' },
+      { status: 400 }
+    )
+  }
+
+  const url = `${issuer}/fhir/R4/${cleanPath}`
 
   const response = await fetch(url, {
     method,

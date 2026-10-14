@@ -13,7 +13,7 @@ async function withMcpClient<T>(fn: (client: Client) => Promise<T>): Promise<T> 
     }
   })
 
-  const client = new Client({ name: 'prior-auth-demo', version: '0.1.0' })
+  const client = new Client({ name: 'webhook-relay-demo', version: '0.1.0' })
   await client.connect(transport)
   try {
     return await fn(client)

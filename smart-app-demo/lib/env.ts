@@ -25,3 +25,25 @@ export function getWebhookSecret() {
 export function getPublicAppUrl() {
   return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3005'
 }
+
+/**
+ * Resolve the SMART issuer URL safely to prevent SSRF / bearer token exfiltration.
+ * Rejects any client-supplied `iss` whose origin does not match `HEBRAH_API_BASE_URL`.
+ */
+export function resolveSafeIssuer(clientIss?: string): string {
+  const configured = getHebrahApiBaseUrl().replace(/\/$/, '')
+  if (!clientIss) return configured
+  try {
+    const expectedOrigin = new URL(configured).origin
+    const candidate = new URL(clientIss)
+    if (candidate.origin !== expectedOrigin) {
+      throw new Error(`Untrusted SMART issuer origin: ${candidate.origin}`)
+    }
+    return configured
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith('Untrusted SMART issuer')) {
+      throw err
+    }
+    throw new Error('Invalid SMART issuer URL')
+  }
+}

@@ -14,7 +14,12 @@ import {
   type TriggerMockEventResponse
 } from '@hebrah/sdk'
 
-import { getHebrahApiBaseUrl, getHebrahApiKey, getHebrahConnectionId } from './env'
+import {
+  getHebrahApiBaseUrl,
+  getHebrahApiKey,
+  getHebrahConnectionId,
+  getHebrahEnvironmentId
+} from './env'
 
 export { HebrahApiError }
 
@@ -28,7 +33,8 @@ export function hebrahClient(): HebrahClient {
     _client = new HebrahClient({
       apiKey: getHebrahApiKey(),
       baseUrl: getHebrahApiBaseUrl(),
-      defaultConnectionId: getHebrahConnectionId()
+      defaultConnectionId: getHebrahConnectionId(),
+      environmentId: getHebrahEnvironmentId()
     })
   }
   return _client

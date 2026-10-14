@@ -1,15 +1,10 @@
-import { createHmac, timingSafeEqual } from 'crypto'
+import { verifyWebhookSignature as sdkVerifyWebhookSignature } from '@hebrah/sdk'
 import { getWebhookSecret } from './env'
 
-export function verifyWebhookSignature(rawBody: Buffer, signatureHeader: string | null) {
-  if (!signatureHeader) return false
-
-  const expected = createHmac('sha256', getWebhookSecret()).update(rawBody).digest('hex')
+export function verifyWebhookSignature(rawBody: Buffer, signatureHeader: string | null): boolean {
   try {
-    return (
-      expected.length === signatureHeader.length &&
-      timingSafeEqual(Buffer.from(expected, 'utf8'), Buffer.from(signatureHeader, 'utf8'))
-    )
+    sdkVerifyWebhookSignature(rawBody, signatureHeader, getWebhookSecret())
+    return true
   } catch {
     return false
   }

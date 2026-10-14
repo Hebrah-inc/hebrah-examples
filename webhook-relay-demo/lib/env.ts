@@ -7,7 +7,7 @@ export function getWebhookSecret() {
 }
 
 export function getPublicAppUrl() {
-  return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3003'
+  return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3004'
 }
 
 export function getMcpUrl() {

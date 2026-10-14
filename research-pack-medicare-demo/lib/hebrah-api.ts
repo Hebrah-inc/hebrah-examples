@@ -1,23 +1,28 @@
-import { getConnectionId, getHebrahApiBaseUrl, getHebrahApiKey, RESEARCH_PACK_ID } from './env'
+import { HebrahApiError, HebrahClient, safePathSegment } from '@hebrah/sdk'
+import { getConnectionId, getHebrahApiBaseUrl, getHebrahApiKey, getHebrahEnvironmentId, RESEARCH_PACK_ID } from './env'
 
-export class HebrahApiError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-    public detail?: string
-  ) {
-    super(message)
-    this.name = 'HebrahApiError'
-  }
+export { HebrahApiError }
+
+function client() {
+  return new HebrahClient({
+    apiKey: getHebrahApiKey(),
+    baseUrl: getHebrahApiBaseUrl(),
+    defaultConnectionId: getConnectionId() || undefined,
+    environmentId: getHebrahEnvironmentId() || undefined
+  })
 }
 
 async function hebrahFetch(path: string, init?: RequestInit) {
   const base = getHebrahApiBaseUrl().replace(/\/$/, '')
   const apiKey = getHebrahApiKey()
   const connectionId = getConnectionId()
+  const environmentId = getHebrahEnvironmentId()
   const url = new URL(`${base}${path}`)
   if (connectionId && !url.searchParams.has('connection_id')) {
     url.searchParams.set('connection_id', connectionId)
+  }
+  if (environmentId && !url.searchParams.has('environment_id')) {
+    url.searchParams.set('environment_id', environmentId)
   }
 
   let response: Response
@@ -47,35 +52,31 @@ export async function listResearchPacks() {
 }
 
 export async function applyResearchPack(packId = RESEARCH_PACK_ID) {
-  const res = await hebrahFetch(`/v1/sandbox/research-packs/${encodeURIComponent(packId)}/apply`, {
+  const res = await hebrahFetch(`/v1/sandbox/research-packs/${safePathSegment(packId, 'packId')}/apply`, {
     method: 'POST'
   })
   return res.json()
 }
 
 export async function compareResearchPack(packId = RESEARCH_PACK_ID) {
-  const res = await hebrahFetch(`/v1/sandbox/research-packs/${encodeURIComponent(packId)}/compare`)
+  const res = await hebrahFetch(`/v1/sandbox/research-packs/${safePathSegment(packId, 'packId')}/compare`)
   return res.json()
 }
 
 export async function getResearchPackKpis(packId = RESEARCH_PACK_ID) {
-  const res = await hebrahFetch(`/v1/sandbox/research-packs/${encodeURIComponent(packId)}/kpis`)
+  const res = await hebrahFetch(`/v1/sandbox/research-packs/${safePathSegment(packId, 'packId')}/kpis`)
   return res.json()
 }
 
 export async function runScenario(scenarioId: string, patientId: string) {
   const connectionId = getConnectionId()
-  const res = await hebrahFetch(`/v1/sandbox/scenarios/${scenarioId}/run`, {
-    method: 'POST',
-    body: JSON.stringify({
-      patient_id: patientId,
-      ...(connectionId ? { connection_id: connectionId } : {})
-    })
+  return client().sandbox.runScenario(scenarioId, {
+    patientId,
+    ...(connectionId ? { connectionId } : {})
   })
-  return res.json()
 }
 
 export async function fetchCatalog() {
-  const res = await hebrahFetch('/v1/sandbox/catalog')
-  return res.json() as Promise<{ sample_patient_ids?: string[] }>
+  return client().sandbox.catalog() as Promise<{ sample_patient_ids?: string[] }>
 }
+

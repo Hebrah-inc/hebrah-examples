@@ -30,8 +30,8 @@ Future demos use ports **3013+** (avoid **3010** hebrah-admin / **3011** hebrah-
 
 Hebrah publishes a few open source packages that pair with these demos:
 
-- [`Hebrah-inc/hebrah-sdk-node`](https://github.com/Hebrah-inc/hebrah-sdk-node) — Node.js SDK (`@hebrah/sdk` on npm)
-- [`Hebrah-inc/hebrah-sdk-python`](https://github.com/Hebrah-inc/hebrah-sdk-python) — Python SDK (`hebrah` on PyPI)
+- [`Hebrah-inc/hebrah-sdk-node`](https://github.com/Hebrah-inc/hebrah-sdk-node) — Node.js SDK (`@hebrah/sdk@^0.9.0` on npm)
+- [`Hebrah-inc/hebrah-sdk-python`](https://github.com/Hebrah-inc/hebrah-sdk-python) — Python SDK (`hebrah>=0.9.0` on PyPI)
 - [`Hebrah-inc/hebrah-vm-templates`](https://github.com/Hebrah-inc/hebrah-vm-templates) — NixOS microVM templates that power the sandbox sidecars
 - [`Hebrah-inc/hebrah-sidecar`](https://github.com/Hebrah-inc/hebrah-sidecar) — legacy sidecar Nix flake
 - [`Hebrah-inc/hebrah-api`](https://github.com/Hebrah-inc/hebrah-api) — the hebrah control plane these demos talk to
@@ -42,11 +42,11 @@ See [hebrah.com/open-source](https://hebrah.com/open-source) for the full list.
 
 1. **Node.js 22+** and **pnpm 11+**
 2. A running hebrah-api control plane — either local Docker Compose or hosted `https://api.hebrah.com`
-3. Sandbox credentials from Hebrah onboarding:
+3. Sandbox / Isolated Health Environment credentials from Hebrah onboarding:
    - `HEBRAH_SANDBOX_API_KEY` (`hb_test_*`) — bearer API key for the control plane
    - `HEBRAH_WEBHOOK_SECRET` (`hbsec_*`) — HMAC secret used to sign outbound webhooks
-   - `HEBRAH_CONNECTION_ID` (`conn-sa-*`) — your sandbox connection ID
-4. For `admit-monitor-demo`: a hosted MCP personal access token (`hb_pat_*`) from the Hebrah dashboard → **Settings → MCP**
+   - `HEBRAH_ENVIRONMENT_ID` (`env_*`, optional) or `HEBRAH_CONNECTION_ID` (`conn-sa-*`) — your isolated clinic environment or sandbox connection ID
+4. For `admit-monitor-demo` and `athena-model-agent-demo`: a hosted MCP personal access token (`hb_pat_*`) from the Hebrah dashboard → **Settings → MCP**
 
 If you don't have credentials yet, request access at [hebrah.com/request-demo](https://hebrah.com/request-demo).
 

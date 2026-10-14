@@ -12,6 +12,10 @@ export function getConnectionId() {
   return process.env.HEBRAH_CONNECTION_ID ?? ''
 }
 
+export function getHebrahEnvironmentId() {
+  return process.env.HEBRAH_ENVIRONMENT_ID ?? ''
+}
+
 export function getPublicAppUrl() {
   return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3012'
 }

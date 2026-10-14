@@ -30,11 +30,12 @@ Report issues in the hebrah control plane or dashboard directly to **security@he
 
 These demos talk to a real hebrah sandbox. Treat credentials carefully:
 
-- Copy `.env.example` to `.env` and fill in placeholders from your hebrah onboarding step. Never commit `.env`.
-- `HEBRAH_API_KEY` (`hb_test_*` / `hb_live_*`), `HEBRAH_WEBHOOK_SECRET` (`hbsec_*`), and MCP personal access tokens (`hb_pat_*`) are bearer credentials. Store them in server-side environment variables or a secrets manager — never in browser bundles, client code, or committed files.
+- Copy `.env.example` to `.env` and fill in placeholders from your hebrah onboarding step. Never commit `.env` or `.env.bak` files.
+- `HEBRAH_SANDBOX_API_KEY` (`hb_test_*` / `hb_live_*`), `HEBRAH_WEBHOOK_SECRET` (`hbsec_*`), and MCP personal access tokens (`hb_pat_*`) are bearer credentials. Store them in server-side environment variables or a secrets manager — never in browser bundles, client code, or committed files. All demos fail closed if required credentials are missing.
 - Sandbox keys (`hb_test_*`) are not PHI-safe. Do not point a demo at real production systems.
-- Inbound webhooks carry an `X-Hebrah-Signature` HMAC header. Demos in this repo verify the signature with constant-time compare before processing the body. Do not skip the verification step in your own integrations.
-- Synthetic FHIR fixtures are connection-scoped (`pat_{connection_seed}_01`). Different connections see different synthetic patients — there is no cross-tenant data leak in the sandbox.
+- Inbound webhooks carry an `X-Hebrah-Signature` HMAC header. All demos verify the signature against the raw request body using `verifyWebhookSignature` from `@hebrah/sdk` (`timingSafeEqual` + hex validation) **before** calling `JSON.parse`. Do not skip or reorder the verification step in your own integrations.
+- Route parameters and FHIR/SMART proxy paths enforce strict allowlist validation (`safePathSegment`, origin matching against `HEBRAH_API_BASE_URL`, and action allowlists) to prevent SSRF and path traversal.
+- Synthetic FHIR fixtures are connection/environment-scoped (`pat_{connection_seed}_01`). Different connections see different synthetic patients — there is no cross-tenant data leak in the sandbox.
 
 ## Supported versions
 

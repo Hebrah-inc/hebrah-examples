@@ -1,6 +1,8 @@
 # Dependencies
+node_modules
 node_modules/
 .pnpm-store/
+**/node_modules
 **/node_modules/
 
 # Next.js build output
@@ -14,6 +16,8 @@ out/
 .env.*
 **/.env
 **/.env.*
+*.bak
+**/*.bak
 !.env.example
 !**/.env.example
 
