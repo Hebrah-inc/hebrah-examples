@@ -1,0 +1,14 @@
+{
+  "name": "hebrah-isolated-health-env-agent-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local Node.js Health App & End-to-End Agent Evaluation using SKILL.md, @hebrah/sdk, PostgreSQL Add-on, and HL7 v2 WebSockets",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test:e2e": "node agent-e2e-eval.mjs"
+  },
+  "dependencies": {
+    "@hebrah/sdk": "file:../../hebrah-sdk-node"
+  }
+}
