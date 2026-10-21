@@ -1,25 +1,25 @@
 {
-  "generatedAt": "2026-10-21T01:26:21.817Z",
+  "generatedAt": "2026-10-21T02:25:25.644Z",
   "wwwUrl": "https://hebrah-staging-www-76zyj6ngda-uc.a.run.app",
   "apiUrl": "https://hebrah-staging-api-76zyj6ngda-uc.a.run.app",
   "appUrl": "https://hebrah-staging-app-76zyj6ngda-uc.a.run.app",
   "mcpUrl": "https://hebrah-staging-mcp-76zyj6ngda-uc.a.run.app/mcp",
   "agentAccount": {
-    "orgId": "4bc8dd9c-0cf2-42b2-bdf9-198bab69c14c",
-    "agentEmail": "agent-e2e-1792545969216@hebrah.com",
-    "claimUrl": "https://hebrah-staging-app-76zyj6ngda-uc.a.run.app/claim-org/83cb7bfcfe3884a864847daf0314f194be94c57490ca3dd9bab9078e01249435",
-    "keyPrefix": "hb_conn_49ef..."
+    "orgId": "ccb0df4e-63e4-4e2c-bd0f-96ecdf21ec74",
+    "agentEmail": "agent-e2e-1792549515886@hebrah.com",
+    "claimUrl": "https://hebrah-staging-app-76zyj6ngda-uc.a.run.app/claim-org/ba73fa9664f055854b9b803d1c4866baafe1ef87ad948597d2c4f48b09549e90",
+    "keyPrefix": "hb_conn_3627..."
   },
-  "environmentId": "f07b5138-e6ff-4007-b944-d0c4e578bcf9",
+  "environmentId": "d1885b38-ce79-4b83-a8fb-e30d8a81e910",
   "summaryStats": {
     "totalChecks": 55,
     "passedChecks": 55,
     "failedChecks": 0,
-    "minLatencyMs": 1.3,
-    "p50LatencyMs": 175.2,
-    "avgLatencyMs": 268.1,
-    "p95LatencyMs": 928.9,
-    "maxLatencyMs": 1554.7
+    "minLatencyMs": 0.6,
+    "p50LatencyMs": 152.6,
+    "avgLatencyMs": 208.4,
+    "p95LatencyMs": 548.8,
+    "maxLatencyMs": 1119.6
   },
   "metrics": [
     {
@@ -27,7 +27,7 @@
       "name": "GET / (HTML Landing)",
       "status": 200,
       "ok": true,
-      "latencyMs": 928.9,
+      "latencyMs": 353.5,
       "note": "22962 bytes, Content-Type: text/html;charset=utf-8"
     },
     {
@@ -35,7 +35,7 @@
       "name": "GET / (Accept: text/markdown)",
       "status": 200,
       "ok": true,
-      "latencyMs": 172.5,
+      "latencyMs": 157,
       "note": "6413 bytes, Content-Type: text/markdown; charset=utf-8"
     },
     {
@@ -43,7 +43,7 @@
       "name": "GET /SKILL.md",
       "status": 200,
       "ok": true,
-      "latencyMs": 75.7,
+      "latencyMs": 62.4,
       "note": "11165 bytes"
     },
     {
@@ -51,7 +51,7 @@
       "name": "GET /.well-known/api-catalog",
       "status": 200,
       "ok": true,
-      "latencyMs": 77,
+      "latencyMs": 69.4,
       "note": "HTTP 200 (1797 bytes)"
     },
     {
@@ -59,7 +59,7 @@
       "name": "GET /llms.txt",
       "status": 200,
       "ok": true,
-      "latencyMs": 129.3,
+      "latencyMs": 63.9,
       "note": "HTTP 200 (6269 bytes)"
     },
     {
@@ -67,7 +67,7 @@
       "name": "GET /robots.txt",
       "status": 200,
       "ok": true,
-      "latencyMs": 68.2,
+      "latencyMs": 57.6,
       "note": "HTTP 200 (26 bytes)"
     },
     {
@@ -75,7 +75,7 @@
       "name": "GET /.well-known/agent-configuration",
       "status": 200,
       "ok": true,
-      "latencyMs": 64.7,
+      "latencyMs": 71.7,
       "note": "HTTP 200"
     },
     {
@@ -83,7 +83,7 @@
       "name": "Markdown Guide Endpoint: POST /v1/agent/register",
       "status": 201,
       "ok": true,
-      "latencyMs": 471.3,
+      "latencyMs": 614,
       "note": "HTTP 201 (documented in Accept: text/markdown, actual route is /v1/agent/account)"
     },
     {
@@ -91,7 +91,7 @@
       "name": "Registration Shield on POST /v1/agent/account (Block @example.com)",
       "status": 400,
       "ok": true,
-      "latencyMs": 196.2,
+      "latencyMs": 276.7,
       "note": "Correctly blocked disposable/dummy domain (400)"
     },
     {
@@ -99,15 +99,15 @@
       "name": "POST /v1/agent/account ($5 Free Trial Signup)",
       "status": 201,
       "ok": true,
-      "latencyMs": 284.2,
-      "note": "orgId=4bc8dd9c-0cf2-42b2-bdf9-198bab69c14c, keyPrefix=hb_conn_49ef92..., claimUrl=present"
+      "latencyMs": 370.5,
+      "note": "orgId=ccb0df4e-63e4-4e2c-bd0f-96ecdf21ec74, keyPrefix=hb_conn_3627f2..., claimUrl=present"
     },
     {
       "category": "2. Onboarding & Auth",
       "name": "SDK client.health()",
       "status": 200,
       "ok": true,
-      "latencyMs": 98.3,
+      "latencyMs": 74.9,
       "note": "status=ok"
     },
     {
@@ -115,7 +115,7 @@
       "name": "SDK client.agent.wallet()",
       "status": 200,
       "ok": true,
-      "latencyMs": 175.2,
+      "latencyMs": 133.4,
       "note": "balance=5.00 (500c)"
     },
     {
@@ -123,7 +123,7 @@
       "name": "SKILL.md Architect Payload (`{\"message\": \"...\"}`)",
       "status": 200,
       "ok": true,
-      "latencyMs": 122.2,
+      "latencyMs": 116.4,
       "note": "HTTP 200 | scope=in_scope | archetype=hospital_system"
     },
     {
@@ -131,15 +131,15 @@
       "name": "SDK client.environments.consultArchitect() Schema Check",
       "status": 200,
       "ok": true,
-      "latencyMs": 119.8,
-      "note": "session=69515aee-3628-4a67-aa81-3881149ebaa8"
+      "latencyMs": 126.9,
+      "note": "session=f8096574-100e-4210-ae80-e898373f78ec"
     },
     {
       "category": "3. Architect & Provisioning",
       "name": "Architect Guardrail (Out-of-Scope Refusal)",
       "status": 200,
       "ok": true,
-      "latencyMs": 149.1,
+      "latencyMs": 142.1,
       "note": "scope_status=out_of_scope_refusal, guardrail_triggered=out_of_scope_referral"
     },
     {
@@ -147,15 +147,15 @@
       "name": "SDK client.environments.create (ICU + Postgres 16)",
       "status": 201,
       "ok": true,
-      "latencyMs": 1554.7,
-      "note": "envId=f07b5138-e6ff-4007-b944-d0c4e578bcf9, clinic_type=icu_critical_care, status=active, rate=7c/hr"
+      "latencyMs": 1119.6,
+      "note": "envId=d1885b38-ce79-4b83-a8fb-e30d8a81e910, clinic_type=icu_critical_care, status=active, rate=7c/hr"
     },
     {
       "category": "3. Architect & Provisioning",
       "name": "SDK client.environments.connectAgent()",
       "status": 200,
       "ok": true,
-      "latencyMs": 295.1,
+      "latencyMs": 179.7,
       "note": "Connected to Node Agent ICU Sepsis & Telemetry (12 patients)"
     },
     {
@@ -163,31 +163,31 @@
       "name": "Hosted MCP Initialize + tools/list + tools/call (Streamable HTTP)",
       "status": 200,
       "ok": true,
-      "latencyMs": 1027.5,
-      "note": "session=393de9d0..., 28 MCP tools discovered"
+      "latencyMs": 376.3,
+      "note": "session=8dfd5ad8..., 28 MCP tools discovered"
     },
     {
       "category": "4. Data Retrieval",
       "name": "SDK client.db.tables() (Postgres Schema)",
       "status": 200,
       "ok": true,
-      "latencyMs": 190.2,
-      "note": "schema=env_f07b5138e6ff, 23 tables (patients:12, encounters:12, vital_signs:36, medications:34, claims:12...)"
+      "latencyMs": 152.6,
+      "note": "schema=env_d1885b38ce79, 23 tables (patients:12, encounters:12, vital_signs:36, medications:34, claims:12...)"
     },
     {
       "category": "4. Data Retrieval",
       "name": "SDK client.db.query (SELECT patients JOIN encounters)",
       "status": 200,
       "ok": true,
-      "latencyMs": 200.8,
-      "note": "10 rows returned in 13ms DB execution"
+      "latencyMs": 169.8,
+      "note": "10 rows returned in 8ms DB execution"
     },
     {
       "category": "4. Data Retrieval",
       "name": "SDK client.environments.getPatientChart()",
       "status": 200,
       "ok": true,
-      "latencyMs": 297.8,
+      "latencyMs": 292.3,
       "note": "patient=Eleanor Vance, vitals=3, labs=0, meds=4"
     },
     {
@@ -195,7 +195,7 @@
       "name": "SKILL.md Endpoint: GET /v1/environments/{id}/fhir/Patient",
       "status": 200,
       "ok": true,
-      "latencyMs": 163.7,
+      "latencyMs": 126.3,
       "note": "HTTP 200"
     },
     {
@@ -203,7 +203,7 @@
       "name": "SKILL.md Endpoint: POST /v1/environments/{id}/fhir/bulk-export",
       "status": 202,
       "ok": true,
-      "latencyMs": 150.7,
+      "latencyMs": 117.9,
       "note": "HTTP 202"
     },
     {
@@ -211,15 +211,15 @@
       "name": "Actual FHIR Bulk Export: POST /v1/environments/{id}/fhir/$export",
       "status": 202,
       "ok": true,
-      "latencyMs": 147.2,
-      "note": "HTTP 202, job_id=bulk-588b8d9c4eb0, streams=9"
+      "latencyMs": 101.1,
+      "note": "HTTP 202, job_id=bulk-56b8d5902cbf, streams=9"
     },
     {
       "category": "4. Data Retrieval",
       "name": "FHIR Terminology: GET /fhir/ValueSet/$expand?url=sepsis",
       "status": 200,
       "ok": true,
-      "latencyMs": 120.5,
+      "latencyMs": 97.2,
       "note": "HTTP 200, concepts=1"
     },
     {
@@ -227,7 +227,7 @@
       "name": "DICOMweb PACS: GET /v1/environments/{id}/dicomweb/studies",
       "status": 200,
       "ok": true,
-      "latencyMs": 313,
+      "latencyMs": 201.5,
       "note": "HTTP 200, studies=12"
     },
     {
@@ -235,7 +235,7 @@
       "name": "IEEE 11073 Telemetry: GET /v1/environments/{id}/devices/telemetry",
       "status": 200,
       "ok": true,
-      "latencyMs": 164.5,
+      "latencyMs": 123.9,
       "note": "HTTP 200, streams=0"
     },
     {
@@ -243,7 +243,7 @@
       "name": "IHE XDS.b & C-CDA: GET /v1/environments/{id}/hie/xds/query",
       "status": 200,
       "ok": true,
-      "latencyMs": 156.7,
+      "latencyMs": 128.1,
       "note": "HTTP 200, documents=12"
     },
     {
@@ -251,7 +251,7 @@
       "name": "SDOH & Genomics: GET /sdoh & GET /genomics",
       "status": 200,
       "ok": true,
-      "latencyMs": 263,
+      "latencyMs": 206.3,
       "note": "sdoh=200, genomics=200"
     },
     {
@@ -259,7 +259,7 @@
       "name": "SKILL.md Endpoint: POST /v1/environments/{id}/edi",
       "status": 200,
       "ok": true,
-      "latencyMs": 163.1,
+      "latencyMs": 107,
       "note": "HTTP 200"
     },
     {
@@ -267,7 +267,7 @@
       "name": "SKILL.md Endpoint: POST /v1/environments/{id}/scenarios/trigger",
       "status": 200,
       "ok": true,
-      "latencyMs": 162.8,
+      "latencyMs": 112.5,
       "note": "HTTP 200"
     },
     {
@@ -275,7 +275,7 @@
       "name": "SDK client.environments.openDataCatalog()",
       "status": 200,
       "ok": true,
-      "latencyMs": 318,
+      "latencyMs": 231.2,
       "note": "packs=6"
     },
     {
@@ -283,31 +283,31 @@
       "name": "SKILL.md Studio Payload (`{\"message\": \"...\"}`) vs SDK (`{\"prompt\": \"...\"}`)",
       "status": 200,
       "ok": true,
-      "latencyMs": 427.7,
-      "note": "SKILL.md 'message' HTTP 200 (session=58d937a5-350a-4e6e-a3a8-070c2b8040b9); SDK 'prompt' HTTP 422=false"
+      "latencyMs": 355,
+      "note": "SKILL.md 'message' HTTP 200 (session=62e3e33e-a269-4489-ad5f-857e8fff692f); SDK 'prompt' HTTP 422=false"
     },
     {
       "category": "5. Postgres DB Input & Guardrails",
       "name": "Postgres DDL: CREATE TABLE IF NOT EXISTS clinical_triage_notes",
       "status": 200,
       "ok": true,
-      "latencyMs": 224,
-      "note": "Created table in isolated schema (19ms)"
+      "latencyMs": 171.6,
+      "note": "Created table in isolated schema (15ms)"
     },
     {
       "category": "5. Postgres DB Input & Guardrails",
       "name": "Postgres DML: INSERT INTO clinical_triage_notes (parameterized)",
       "status": 200,
       "ok": true,
-      "latencyMs": 196.7,
-      "note": "Inserted & returned note_id=note-1792545976521"
+      "latencyMs": 168.8,
+      "note": "Inserted & returned note_id=note-1792549521229"
     },
     {
       "category": "5. Postgres DB Input & Guardrails",
       "name": "Postgres DML: UPDATE clinical_triage_notes",
       "status": 200,
       "ok": true,
-      "latencyMs": 243.4,
+      "latencyMs": 166.3,
       "note": "Updated severity=RESOLVED_STABLE, lactate=1.8"
     },
     {
@@ -315,15 +315,15 @@
       "name": "SDK client.db.recordOutcome() -> app_outcomes table",
       "status": 200,
       "ok": true,
-      "latencyMs": 169.7,
-      "note": "outcome_id=out-f07b-b3a958, score=92"
+      "latencyMs": 142.2,
+      "note": "outcome_id=out-d188-016ef7, score=92"
     },
     {
       "category": "5. Postgres DB Input & Guardrails",
       "name": "SDK client.environments.admitPatients() (Dynamic Cohort Input)",
       "status": 200,
       "ok": true,
-      "latencyMs": 333.3,
+      "latencyMs": 332.6,
       "note": "admitted=3, total=15"
     },
     {
@@ -331,7 +331,7 @@
       "name": "SQL AST Guardrail: Block DROP TABLE patients",
       "status": 403,
       "ok": true,
-      "latencyMs": 116.8,
+      "latencyMs": 121.6,
       "note": "Blocked with HTTP 403: Control plane request failed (403): {\"detail\":\"Destructive DDL/DCL commands (DROP, ALTER, TRUNCATE, GRANT, REVOKE, COPY, SET) and system schema access are denied.\"}"
     },
     {
@@ -339,7 +339,7 @@
       "name": "SQL AST Guardrail: Block Cross-Schema public.organizations",
       "status": 403,
       "ok": true,
-      "latencyMs": 122.4,
+      "latencyMs": 121.2,
       "note": "Blocked with HTTP 403: Control plane request failed (403): {\"detail\":\"Destructive DDL/DCL commands (DROP, ALTER, TRUNCATE, GRANT, REVOKE, COPY, SET) and system schema access are denied.\"}"
     },
     {
@@ -347,7 +347,7 @@
       "name": "Inbound DLP Guardrail: Block Real SSN Pattern in SQL & Outcomes",
       "status": 400,
       "ok": true,
-      "latencyMs": 261.3,
+      "latencyMs": 232.1,
       "note": "sqlBlocked=true, outcomeBlocked=true"
     },
     {
@@ -355,7 +355,7 @@
       "name": "Local App: Initialize Custom Postgres Table (sepsis_triage_queue)",
       "status": 200,
       "ok": true,
-      "latencyMs": 261,
+      "latencyMs": 176.7,
       "note": "sepsis_triage_queue ready"
     },
     {
@@ -363,7 +363,7 @@
       "name": "WebSocket Connect: wss://.../v1/environments/{id}/ws",
       "status": 101,
       "ok": true,
-      "latencyMs": 126.1,
+      "latencyMs": 112.5,
       "note": "Greeting: Connected to real-time HL7 v2 and EHR telemetry feed"
     },
     {
@@ -371,15 +371,15 @@
       "name": "WebSocket Bidirectional Ping -> PONG",
       "status": 200,
       "ok": true,
-      "latencyMs": 63.2,
-      "note": "RTT=63.1ms (server ts=2026-10-21T01:26:18.543613+00:00)"
+      "latencyMs": 46.8,
+      "note": "RTT=46.7ms (server ts=2026-10-21T02:25:22.892880+00:00)"
     },
     {
       "category": "6. WebSockets & Local Health App",
       "name": "Local App GET /api/health",
       "status": 200,
       "ok": true,
-      "latencyMs": 424.4,
+      "latencyMs": 253.3,
       "note": "envStatus=active, wsConnected=true, wallet=4.88"
     },
     {
@@ -387,15 +387,15 @@
       "name": "Local App POST /api/triage (Postgres Write + Outcome)",
       "status": 201,
       "ok": true,
-      "latencyMs": 546.1,
-      "note": "queueId=triage-mvhfldi8, outcomeId=out-f07b-067aed, status=CRITICAL_SEPSIS_ALERT"
+      "latencyMs": 479,
+      "note": "queueId=triage-mvhhpc9j, outcomeId=out-d188-7b474a, status=CRITICAL_SEPSIS_ALERT"
     },
     {
       "category": "6. WebSockets & Local Health App",
       "name": "Local App POST /api/scenario -> Real-Time HL7 v2 WebSocket Broadcast",
       "status": 200,
       "ok": true,
-      "latencyMs": 539.2,
+      "latencyMs": 548.8,
       "note": "Triggered scenario; received 1 live WebSocket frame(s) (latest event=HL7_ALERT)"
     },
     {
@@ -403,7 +403,7 @@
       "name": "Emit Device Telemetry -> Real-Time WebSocket Broadcast",
       "status": 200,
       "ok": true,
-      "latencyMs": 541.5,
+      "latencyMs": 507.5,
       "note": "HTTP 200; new WebSocket frames=1 (total buffered=4)"
     },
     {
@@ -411,7 +411,7 @@
       "name": "Local App GET /api/patients (Verify Persisted Triage Queue)",
       "status": 200,
       "ok": true,
-      "latencyMs": 359.8,
+      "latencyMs": 164.2,
       "note": "patients=15, triageQueue=1"
     },
     {
@@ -419,15 +419,15 @@
       "name": "SDK HebrahAgentHarness.callTool(\"env_list\") Session Check",
       "status": 200,
       "ok": true,
-      "latencyMs": 284.4,
-      "note": "Returned [{\"id\":\"f07b5138-e6ff-4007-b944-d0c4e578bcf9\",\"org_id\":\"4bc8dd9c-0cf2-42b2-bdf9-"
+      "latencyMs": 228.8,
+      "note": "Returned [{\"id\":\"d1885b38-ce79-4b83-a8fb-e30d8a81e910\",\"org_id\":\"ccb0df4e-63e4-4e2c-bd0f-"
     },
     {
       "category": "7. Security & Audit",
       "name": "SDK client.environments.logs() (Tamper-Evident Audit Trail)",
       "status": 200,
       "ok": true,
-      "latencyMs": 143.3,
+      "latencyMs": 127.1,
       "note": "27 audit log entries recorded"
     },
     {
@@ -435,7 +435,7 @@
       "name": "Cross-Tenant BOLA/IDOR Isolation Check",
       "status": 404,
       "ok": true,
-      "latencyMs": 120.5,
+      "latencyMs": 106,
       "note": "Correctly isolated with HTTP 404"
     },
     {
@@ -443,7 +443,7 @@
       "name": "Zero-Leak Error Redaction Check (SDK redactSecrets)",
       "status": 200,
       "ok": true,
-      "latencyMs": 1.3,
+      "latencyMs": 0.6,
       "note": "Scrubbed output: \"Error calling API with Bearer [REDACTED_HEBRAH_TOKEN] and enc:v1:[REDACTED]\""
     },
     {
@@ -451,7 +451,7 @@
       "name": "Final Wallet Balance & Usage Metering Check",
       "status": 200,
       "ok": true,
-      "latencyMs": 291,
+      "latencyMs": 249.3,
       "note": "balance=4.78 (478c), queries_run=11, bytes_egressed=8445"
     },
     {
@@ -459,7 +459,7 @@
       "name": "SDK client.environments.pause() ($0.00/hr idle)",
       "status": 200,
       "ok": true,
-      "latencyMs": 128.6,
+      "latencyMs": 118.2,
       "note": "status=paused, hourly_rate_cents=0"
     }
   ],

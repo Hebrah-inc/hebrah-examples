@@ -1,10 +1,60 @@
 import http from 'node:http'
-import { HebrahClient, redactSecrets } from '../../hebrah-sdk-node/dist/index.js'
+import { HebrahClient, redactSecrets } from '@hebrah/sdk'
+
+/**
+ * Discovers Hebrah endpoints from `/SKILL.md`, registers a headless agent account
+ * ($5.00 free trial credit), and provisions an ICU Critical Care + PostgreSQL 16
+ * isolated health environment when credentials are not already provided.
+ */
+export async function bootstrapFromSkillMd(
+  wwwUrl = process.env.WWW_URL || 'https://hebrah-staging-www-76zyj6ngda-uc.a.run.app'
+) {
+  const skillRes = await fetch(`${wwwUrl.replace(/\/$/, '')}/SKILL.md`)
+  if (!skillRes.ok) {
+    throw new Error(`Failed to fetch SKILL.md (${skillRes.status})`)
+  }
+  const skillText = await skillRes.text()
+  const apiUrlMatch = skillText.match(/\*\*API Control Plane \(`apiUrl`\)\*\*:\s*`([^`]+)`/)
+  const baseUrl =
+    process.env.HEBRAH_API_URL ||
+    (apiUrlMatch ? apiUrlMatch[1] : 'https://hebrah-staging-api-76zyj6ngda-uc.a.run.app')
+
+  const ts = Date.now()
+  const regRes = await fetch(`${baseUrl}/v1/agent/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      org_name: `Hebrah Demo App ${ts}`,
+      agent_name: `icu-sepsis-demo-${ts}`,
+      contact_email: `demo-${ts}@hebrah.com`
+    })
+  })
+  if (!regRes.ok) {
+    throw new Error(`Agent self-registration failed (${regRes.status}): ${await regRes.text()}`)
+  }
+  const regData = await regRes.json()
+  const apiKey = regData.apiKey || regData.api_key
+
+  const client = new HebrahClient({ apiKey, baseUrl })
+  const env = await client.environments.create({
+    name: 'ICU Sepsis & Real-Time Telemetry Demo',
+    archetype: 'icu_critical_care',
+    addons: ['postgres'],
+    seed_patients: 12
+  })
+
+  return {
+    apiKey,
+    baseUrl,
+    environmentId: env.id,
+    claimUrl: regData.claimUrl || regData.claim_url
+  }
+}
 
 /**
  * Creates a local Node.js Clinical Sepsis & Telemetry Health Application
- * powered by @hebrah/sdk, the Isolated Environment PostgreSQL 16 add-on,
- * and Hebrah's real-time HL7 v2 WebSocket stream.
+ * powered by `@hebrah/sdk` (v0.9.2), the Isolated Environment PostgreSQL 16 add-on,
+ * and Hebrah's real-time HL7 v2 + IEEE 11073 WebSocket stream.
  */
 export function createHealthAppServer({ apiKey, baseUrl, environmentId }) {
   const client = new HebrahClient({
@@ -32,14 +82,12 @@ export function createHealthAppServer({ apiKey, baseUrl, environmentId }) {
       }
 
       try {
-        // Node 22/24 global WebSocket supports headers option via undici
         upstreamWs = new WebSocket(wsUrl, {
           headers: {
             Authorization: `Bearer ${apiKey}`
           }
         })
       } catch {
-        // Fallback if headers option is not supported in a browser-like WS implementation
         upstreamWs = new WebSocket(`${wsUrl}?token=${encodeURIComponent(apiKey)}`)
       }
 
@@ -155,8 +203,10 @@ export function createHealthAppServer({ apiKey, baseUrl, environmentId }) {
 
     try {
       if (req.method === 'GET' && url.pathname === '/api/health') {
-        const env = await client.environments.get()
-        const wallet = await client.agent.wallet()
+        const [env, wallet] = await Promise.all([
+          client.environments.get(),
+          client.agent.wallet()
+        ])
         return sendJson(res, 200, {
           status: 'ok',
           environmentId: env.id,
@@ -165,7 +215,8 @@ export function createHealthAppServer({ apiKey, baseUrl, environmentId }) {
           patientCohort: env.patient_cohort,
           envStatus: env.status,
           walletBalanceCents: wallet.balance_cents,
-          walletBalanceUsd: wallet.balance_usd ?? Number(((wallet.balance_cents ?? 0) / 100).toFixed(2)),
+          walletBalanceUsd:
+            wallet.balance_usd ?? Number(((wallet.balance_cents ?? 0) / 100).toFixed(2)),
           wsConnected,
           wsLastPongAt,
           wsEventsBuffered: wsEvents.length
@@ -173,22 +224,33 @@ export function createHealthAppServer({ apiKey, baseUrl, environmentId }) {
       }
 
       if (req.method === 'GET' && url.pathname === '/api/patients') {
-        const dbRes = await client.db.query(`
-          SELECT id, mrn, first_name, last_name, dob, gender, department, acuity_level, primary_condition, status
-          FROM patients
-          ORDER BY id ASC
-          LIMIT 15
-        `)
-        const queueRes = await client.db.query(`
-          SELECT queue_id, patient_id, patient_name, department, qsofa_score, lactate_mmol, triage_status, recommended_action, created_at
-          FROM sepsis_triage_queue
-          ORDER BY created_at DESC
-          LIMIT 10
-        `)
+        const [dbRes, queueRes] = await Promise.all([
+          client.db.query(`
+            SELECT id, mrn, first_name, last_name, dob, gender, department, acuity_level, primary_condition, status
+            FROM patients
+            ORDER BY id ASC
+            LIMIT 15
+          `),
+          client.db.query(`
+            SELECT queue_id, patient_id, patient_name, department, qsofa_score, lactate_mmol, triage_status, recommended_action, created_at
+            FROM sepsis_triage_queue
+            ORDER BY created_at DESC
+            LIMIT 10
+          `)
+        ])
         return sendJson(res, 200, {
           patients: dbRes.rows,
           triageQueue: queueRes.rows
         })
+      }
+
+      if (req.method === 'GET' && url.pathname === '/api/chart') {
+        const patientId = url.searchParams.get('patientId')
+        if (!patientId) {
+          return sendJson(res, 400, { error: 'patientId query parameter is required' })
+        }
+        const chart = await client.environments.getPatientChart(environmentId, patientId)
+        return sendJson(res, 200, chart)
       }
 
       if (req.method === 'POST' && url.pathname === '/api/triage') {
@@ -209,7 +271,8 @@ export function createHealthAppServer({ apiKey, baseUrl, environmentId }) {
 
         const qsofaScore = Number(body.qsofaScore ?? 3)
         const lactateMmol = Number(body.lactateMmol ?? 4.2)
-        const triageStatus = qsofaScore >= 2 || lactateMmol >= 2.0 ? 'CRITICAL_SEPSIS_ALERT' : 'STABLE_WATCH'
+        const triageStatus =
+          qsofaScore >= 2 || lactateMmol >= 2.0 ? 'CRITICAL_SEPSIS_ALERT' : 'STABLE_WATCH'
         const recommendedAction =
           triageStatus === 'CRITICAL_SEPSIS_ALERT'
             ? 'Initiate Surviving Sepsis 1-Hour Bundle: blood cultures, broad-spectrum IV antibiotics, 30mL/kg crystalloid bolus'
@@ -272,6 +335,16 @@ export function createHealthAppServer({ apiKey, baseUrl, environmentId }) {
         return sendJson(res, 200, result)
       }
 
+      if (req.method === 'POST' && url.pathname === '/api/studio') {
+        const body = await readJsonBody(req)
+        const prompt = body.prompt || 'Summarize our ICU critical care sepsis cohort and top risks'
+        const studioRes = await client.environments.consultStudio(environmentId, {
+          prompt,
+          auto_run_tools: true
+        })
+        return sendJson(res, 200, studioRes)
+      }
+
       if (req.method === 'GET' && url.pathname === '/api/ws-events') {
         return sendJson(res, 200, {
           wsConnected,
@@ -286,11 +359,237 @@ export function createHealthAppServer({ apiKey, baseUrl, environmentId }) {
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Hebrah Local Node.js Clinical Sepsis & Telemetry App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hebrah ICU Sepsis & Telemetry Command Center (@hebrah/sdk v0.9.2)</title>
+  <style>
+    :root {
+      --bg: #FAF8F6;
+      --card: #FFFFFF;
+      --border: #E5E0D8;
+      --text: #1A1714;
+      --muted: #696259;
+      --accent: #0F766E;
+      --danger: #B91C1C;
+      --warn: #B45309;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    h1 { margin: 0; font-size: 20px; font-weight: 600; }
+    .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .badges { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .badge {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #EFECE6;
+      color: var(--text);
+    }
+    .badge.ok { background: #CCFBF1; color: #115E59; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      margin: 0 0 12px 0;
+      font-size: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    th { color: var(--muted); font-weight: 500; font-size: 12px; }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #EFECE6;
+      color: var(--text);
+    }
+    pre {
+      background: #141210;
+      color: #E7E2DA;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      overflow-x: auto;
+      max-height: 280px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Hebrah Local Node.js Clinical Sepsis & Telemetry App</h1>
-  <p>Environment ID: <code>${environmentId}</code></p>
+  <header>
+    <div>
+      <h1>Hebrah ICU Sepsis & Telemetry Command Center</h1>
+      <div class="subtitle">Environment ID: <code>${environmentId}</code> · Powered by <code>@hebrah/sdk@0.9.2</code> + PostgreSQL 16 + HL7 v2 WSS</div>
+    </div>
+    <div class="badges" id="status-badges">
+      <span class="badge">Loading status...</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>
+          <span>ICU Cohort (PostgreSQL 16 <code>patients</code>)</span>
+          <button class="secondary" onclick="refreshAll()">Refresh</button>
+        </h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Patient</th>
+              <th>Dept / Acuity</th>
+              <th>Condition</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="patients-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Persisted Sepsis Triage Queue (Custom Table <code>sepsis_triage_queue</code>)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Queue ID</th>
+              <th>Patient</th>
+              <th>qSOFA</th>
+              <th>Lactate</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="triage-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>
+          <span>Real-Time HL7 v2 & IEEE 11073 WebSocket Stream</span>
+          <button onclick="triggerScenario()">Trigger ICU Sepsis Alert</button>
+        </h2>
+        <pre id="ws-feed">Connecting to WebSocket stream...</pre>
+      </div>
+
+      <div class="card">
+        <h2>Selected Patient 5-Tab EHR Chart / AI Studio Output</h2>
+        <pre id="inspector-box">Click "Chart" or "Triage" on any patient row to inspect clinical records.</pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function refreshAll() {
+      const [health, patData, wsData] = await Promise.all([
+        fetch('/api/health').then(r => r.json()),
+        fetch('/api/patients').then(r => r.json()),
+        fetch('/api/ws-events').then(r => r.json())
+      ]);
+
+      document.getElementById('status-badges').innerHTML = [
+        '<span class="badge ok">Env: ' + health.envStatus + ' (' + health.clinicType + ')</span>',
+        '<span class="badge ' + (health.wsConnected ? 'ok' : '') + '">WSS: ' + (health.wsConnected ? 'CONNECTED' : 'DISCONNECTED') + '</span>',
+        '<span class="badge">Wallet: $' + health.walletBalanceUsd + '</span>'
+      ].join('');
+
+      document.getElementById('patients-tbody').innerHTML = (patData.patients || []).map(p => (
+        '<tr>' +
+          '<td><code>' + p.id + '</code></td>' +
+          '<td><strong>' + p.first_name + ' ' + p.last_name + '</strong><br/><small>' + p.gender + ' · ' + (p.dob || p.birth_date || '') + '</small></td>' +
+          '<td>' + (p.department || 'ICU') + ' / ' + (p.acuity_level || 'high') + '</td>' +
+          '<td>' + (p.primary_condition || '') + '</td>' +
+          '<td>' +
+            '<button onclick="runTriage(\\'' + p.id + '\\')">Triage (PG Write)</button> ' +
+            '<button class="secondary" onclick="viewChart(\\'' + p.id + '\\')">Chart</button>' +
+          '</td>' +
+        '</tr>'
+      )).join('');
+
+      document.getElementById('triage-tbody').innerHTML = (patData.triageQueue || []).map(q => (
+        '<tr>' +
+          '<td><code>' + q.queue_id + '</code></td>' +
+          '<td>' + q.patient_name + '</td>' +
+          '<td>' + q.qsofa_score + '</td>' +
+          '<td>' + q.lactate_mmol + ' mmol/L</td>' +
+          '<td><strong>' + q.triage_status + '</strong></td>' +
+        '</tr>'
+      )).join('') || '<tr><td colspan="5">No triage entries yet.</td></tr>';
+
+      document.getElementById('ws-feed').textContent = JSON.stringify(wsData.events || [], null, 2);
+    }
+
+    async function runTriage(patientId) {
+      const res = await fetch('/api/triage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patientId, qsofaScore: 3, lactateMmol: 4.6 })
+      }).then(r => r.json());
+      document.getElementById('inspector-box').textContent = JSON.stringify(res, null, 2);
+      await refreshAll();
+    }
+
+    async function viewChart(patientId) {
+      const res = await fetch('/api/chart?patientId=' + encodeURIComponent(patientId)).then(r => r.json());
+      document.getElementById('inspector-box').textContent = JSON.stringify(res, null, 2);
+    }
+
+    async function triggerScenario() {
+      const res = await fetch('/api/scenario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario: 'icu_sepsis_deterioration' })
+      }).then(r => r.json());
+      document.getElementById('inspector-box').textContent = JSON.stringify(res, null, 2);
+      setTimeout(refreshAll, 500);
+    }
+
+    refreshAll();
+    setInterval(refreshAll, 5000);
+  </script>
 </body>
 </html>`)
         return
@@ -323,14 +622,21 @@ export function createHealthAppServer({ apiKey, baseUrl, environmentId }) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const apiKey = process.env.HEBRAH_API_KEY
-  const baseUrl = process.env.HEBRAH_API_URL || 'https://hebrah-staging-api-76zyj6ngda-uc.a.run.app'
-  const environmentId = process.env.HEBRAH_ENV_ID
-  const port = Number(process.env.PORT || 4040)
+  let apiKey = process.env.HEBRAH_API_KEY
+  let baseUrl = process.env.HEBRAH_API_URL || 'https://hebrah-staging-api-76zyj6ngda-uc.a.run.app'
+  let environmentId = process.env.HEBRAH_ENV_ID || process.env.HEBRAH_ENVIRONMENT_ID
+  const port = Number(process.env.PORT || 3013)
 
   if (!apiKey || !environmentId) {
-    console.error('Usage: HEBRAH_API_KEY=hb_... HEBRAH_ENV_ID=... node server.mjs')
-    process.exit(1)
+    console.log('No HEBRAH_API_KEY / HEBRAH_ENV_ID provided — bootstrapping automatically via /SKILL.md...')
+    const boot = await bootstrapFromSkillMd()
+    apiKey = boot.apiKey
+    baseUrl = boot.baseUrl
+    environmentId = boot.environmentId
+    console.log(`Provisioned Isolated ICU Environment: ${environmentId}`)
+    if (boot.claimUrl) {
+      console.log(`Claim Organization URL ($5.00 Free Trial): ${boot.claimUrl}`)
+    }
   }
 
   const app = createHealthAppServer({ apiKey, baseUrl, environmentId })

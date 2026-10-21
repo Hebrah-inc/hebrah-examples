@@ -22,16 +22,17 @@ Reference integration demos for the [Hebrah](https://hebrah.com) healthcare inte
 | Aggregator | [`aggregator-demo/`](./aggregator-demo/) | **3008** | Proxy query to `/v1/sandbox/aggregator/query` with `aggregator.*` webhook inbox |
 | Clinical chart | [`clinical-chart-demo/`](./clinical-chart-demo/) | **3009** | Connection-scoped clinical resources, chart view, `clinical_problem_lifecycle` |
 | Research Pack Medicare | [`research-pack-medicare-demo/`](./research-pack-medicare-demo/) | **3012** | Medicare utilization Research Pack — CMS snapshot vs sandbox claim KPIs |
+| Isolated Health Env Agent Demo | [`isolated-health-env-agent-demo/`](./isolated-health-env-agent-demo/) | **3013** | Node.js ICU Sepsis & Telemetry app (`@hebrah/sdk@0.9.2`) + Postgres 16 writes + HL7 v2 WebSocket stream + 55-check `SKILL.md` E2E agent evaluator |
 | Athena model agent | [`athena-model-agent-demo/`](./athena-model-agent-demo/) | — | Bring-your-own-model harness for MCP + integration-agent EHR workflows |
 
-Future demos use ports **3013+** (avoid **3010** hebrah-admin / **3011** hebrah-local).
+Future demos use ports **3014+** (avoid **3010** hebrah-admin / **3011** hebrah-local).
 
 ## Related repos
 
 Hebrah publishes a few open source packages that pair with these demos:
 
-- [`Hebrah-inc/hebrah-sdk-node`](https://github.com/Hebrah-inc/hebrah-sdk-node) — Node.js SDK (`@hebrah/sdk@^0.9.0` on npm)
-- [`Hebrah-inc/hebrah-sdk-python`](https://github.com/Hebrah-inc/hebrah-sdk-python) — Python SDK (`hebrah>=0.9.0` on PyPI)
+- [`Hebrah-inc/hebrah-sdk-node`](https://github.com/Hebrah-inc/hebrah-sdk-node) — Node.js SDK (`@hebrah/sdk@^0.9.2` on npm)
+- [`Hebrah-inc/hebrah-sdk-python`](https://github.com/Hebrah-inc/hebrah-sdk-python) — Python SDK (`hebrah>=0.9.2` on PyPI)
 - [`Hebrah-inc/hebrah-vm-templates`](https://github.com/Hebrah-inc/hebrah-vm-templates) — NixOS microVM templates that power the sandbox sidecars
 - [`Hebrah-inc/hebrah-sidecar`](https://github.com/Hebrah-inc/hebrah-sidecar) — legacy sidecar Nix flake
 - [`Hebrah-inc/hebrah-api`](https://github.com/Hebrah-inc/hebrah-api) — the hebrah control plane these demos talk to
@@ -100,6 +101,7 @@ hebrah-examples/
 ├── aggregator-demo/           # Port 3008 — aggregator/HIE query
 ├── clinical-chart-demo/       # Port 3009 — clinical chart
 ├── research-pack-medicare-demo/ # Port 3012 — Medicare claims research pack
+├── isolated-health-env-agent-demo/ # Port 3013 — Isolated Health Env + @hebrah/sdk@0.9.2 + E2E Agent Eval
 ├── athena-model-agent-demo/   # BYOM harness for MCP + integration-agent
 ├── LICENSE                    # MIT
 ├── SECURITY.md                # vulnerability disclosure

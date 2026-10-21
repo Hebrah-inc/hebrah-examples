@@ -1,11 +1,11 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { HebrahClient, HebrahAgentHarness, redactSecrets } from '../../hebrah-sdk-node/dist/index.js'
+import { HebrahClient, HebrahAgentHarness, redactSecrets } from '@hebrah/sdk'
 import { createHealthAppServer } from './server.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const WWW_URL = 'https://hebrah-staging-www-76zyj6ngda-uc.a.run.app'
+const WWW_URL = (process.env.WWW_URL || 'https://hebrah-staging-www-76zyj6ngda-uc.a.run.app').replace(/\/$/, '')
 
 const metrics = []
 const findings = []
