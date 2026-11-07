@@ -53,7 +53,7 @@ For security-sensitive issues, follow [SECURITY.md](./SECURITY.md) instead of op
 Open an issue first to discuss scope. We expect new demos to:
 
 1. Cover a clearly distinct integration surface (e.g. credentialing, claim attachment, payer rules)
-2. Run on the next free port in the sequence (see [README](./README.md#demos) — currently 3013+)
+2. Run on the next free port in the sequence (see [README](./README.md#demos) — currently 3015+)
 3. Add a row to the demos table in the root README
 4. Add a `README.md` covering prerequisites, env vars, webhook URL, and a smoke-test recipe
 

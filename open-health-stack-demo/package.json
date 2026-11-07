@@ -1,0 +1,16 @@
+{
+  "name": "hebrah-open-health-stack-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Open Health Stack (OHS) + Hebrah Isolated Health Environment Reference Demo: FHIR R4 Structured Data Capture (Questionnaire/QuestionnaireResponse), FhirDataPipes SQL-on-FHIR PostgreSQL 16 flattening, and WHO/OHS AI Commons evaluation harness",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "evaluate": "node evaluate-ohs.mjs",
+    "test": "node evaluate-ohs.mjs"
+  },
+  "dependencies": {
+    "@hebrah/sdk": "^0.9.2"
+  }
+}

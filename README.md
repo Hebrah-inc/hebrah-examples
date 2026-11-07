@@ -6,7 +6,10 @@
 
 Reference integration demos for the [Hebrah](https://hebrah.com) healthcare integration platform. Each demo is a self-contained Next.js app that exercises the [hebrah control plane](https://github.com/Hebrah-inc/hebrah-api) — synthetic FHIR sandboxes, HL7 inject, multi-step scenarios, and signed webhook delivery.
 
-> **You need a Hebrah sandbox to run these demos.** Platform access is demo-gated. Request access at **[hebrah.com/request-demo](https://hebrah.com/request-demo)** and the team will follow up with `hb_test_*` API keys, `hbsec_*` webhook secrets, and a sandbox connection ID.
+> **Instant $5.00 Free Trial Sandbox (No Credit Card Required):** Spin up an isolated clinic or hospital environment in seconds:
+> - **AI Coding Agents (Claude Code, Cursor, Codex, Antigravity):** `curl -fsSL https://hebrah.com/SKILL.md` (or `POST https://api.hebrah.com/v1/agent/register`)
+> - **Terminal CLI (`@hebrah/cli`):** `npx @hebrah/cli@latest init`
+> - **Web Dashboard:** **[app.hebrah.com/signup](https://app.hebrah.com/signup)**
 
 ## Demos
 
@@ -23,9 +26,10 @@ Reference integration demos for the [Hebrah](https://hebrah.com) healthcare inte
 | Clinical chart | [`clinical-chart-demo/`](./clinical-chart-demo/) | **3009** | Connection-scoped clinical resources, chart view, `clinical_problem_lifecycle` |
 | Research Pack Medicare | [`research-pack-medicare-demo/`](./research-pack-medicare-demo/) | **3012** | Medicare utilization Research Pack — CMS snapshot vs sandbox claim KPIs |
 | Isolated Health Env Agent Demo | [`isolated-health-env-agent-demo/`](./isolated-health-env-agent-demo/) | **3013** | Node.js ICU Sepsis & Telemetry app (`@hebrah/sdk@0.9.2`) + Postgres 16 writes + HL7 v2 WebSocket stream + 55-check `SKILL.md` E2E agent evaluator |
+| Open Health Stack (OHS) Demo | [`open-health-stack-demo/`](./open-health-stack-demo/) | **3014** | Open Health Stack (`ohs.foundation`) + Hebrah reference app: FHIR R4 Structured Data Capture (`Questionnaire`/`QuestionnaireResponse`), `FhirDataPipes` SQL-on-FHIR Postgres 16 flattening, and `AI Commons` evaluation harness |
 | Athena model agent | [`athena-model-agent-demo/`](./athena-model-agent-demo/) | — | Bring-your-own-model harness for MCP + integration-agent EHR workflows |
 
-Future demos use ports **3014+** (avoid **3010** hebrah-admin / **3011** hebrah-local).
+Future demos use ports **3015+** (avoid **3010** hebrah-admin / **3011** hebrah-local).
 
 ## Related repos
 
@@ -49,7 +53,7 @@ See [hebrah.com/open-source](https://hebrah.com/open-source) for the full list.
    - `HEBRAH_ENVIRONMENT_ID` (`env_*`, optional) or `HEBRAH_CONNECTION_ID` (`conn-sa-*`) — your isolated clinic environment or sandbox connection ID
 4. For `admit-monitor-demo` and `athena-model-agent-demo`: a hosted MCP personal access token (`hb_pat_*`) from the Hebrah dashboard → **Settings → MCP**
 
-If you don't have credentials yet, request access at [hebrah.com/request-demo](https://hebrah.com/request-demo).
+If you don't have credentials yet, provision an instant **$5.00 Free Trial** environment via `npx @hebrah/cli@latest init`, `curl -fsSL https://hebrah.com/SKILL.md`, or [app.hebrah.com/signup](https://app.hebrah.com/signup).
 
 ## Connection-scoped patient IDs (Phase 10)
 
@@ -102,6 +106,7 @@ hebrah-examples/
 ├── clinical-chart-demo/       # Port 3009 — clinical chart
 ├── research-pack-medicare-demo/ # Port 3012 — Medicare claims research pack
 ├── isolated-health-env-agent-demo/ # Port 3013 — Isolated Health Env + @hebrah/sdk@0.9.2 + E2E Agent Eval
+├── open-health-stack-demo/    # Port 3014 — Open Health Stack (FHIR R4 SDC + SQL-on-FHIR + AI Commons)
 ├── athena-model-agent-demo/   # BYOM harness for MCP + integration-agent
 ├── LICENSE                    # MIT
 ├── SECURITY.md                # vulnerability disclosure
@@ -117,7 +122,7 @@ The root `.gitignore` covers Node/Next artifacts for every demo.
 See [CONTRIBUTING.md](./CONTRIBUTING.md#proposing-a-new-demo) for the full proposal workflow. Short version:
 
 1. Open an issue to discuss scope (a new integration surface deserves its own demo)
-2. Pick the next free port in the sequence (currently 3013+)
+2. Pick the next free port in the sequence (currently 3015+)
 3. Create a sibling folder with its own `package.json`, `pnpm-lock.yaml`, `README.md`, and `.env.example`
 4. Add a row to the [demos table](#demos) above
 5. Open a PR — maintainers review within a few business days

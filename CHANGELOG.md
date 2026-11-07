@@ -8,6 +8,8 @@ Demos in this repo do not ship a versioned release train — `main` is the suppo
 
 ### Added
 
+- **Open Health Stack (`ohs.foundation`) demo (`open-health-stack-demo`, port 3014)**: FHIR R4 Structured Data Capture (`Questionnaire` / `QuestionnaireResponse`) with offline CHW capture queue, `FhirDataPipes` SQL-on-FHIR flattening into PostgreSQL 16 (`ohs_patient_flat_view` & `ohs_questionnaire_responses`), `~/.hebrah/credentials` (`hebrah login`) auto-discovery, and 5-check OHS `AI Commons` clinical triage & guardrail evaluator
+- **Isolated Health Environment Agent demo (`isolated-health-env-agent-demo`, port 3013)**: Node.js ICU Sepsis & Telemetry Command Center (`@hebrah/sdk@^0.9.2`), PostgreSQL 16 triage queue writes, real-time HL7 v2 + IEEE 11073 WebSocket stream, and 55-check `/SKILL.md` E2E agent evaluation harness
 - **SDK `@hebrah/sdk@^0.9.0` adoption across all 11 demos**: unified control-plane API calls (`HebrahClient.sandbox.*`, `HebrahClient.webhooks.*`), `HEBRAH_ENVIRONMENT_ID` support, and `verifyWebhookSignature` across every Next.js and Node.js demo
 - `athena-model-agent-demo`: added `package.json` and `.env.example` for reproducible standalone setup
 - **Public release metadata:** `LICENSE` (MIT), `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `CHANGELOG.md`
